@@ -1,0 +1,15 @@
+server:
+  port: 8761
+
+  application:
+    name: discovery-service
+
+logging:
+  level:
+    org.springframework.security: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env

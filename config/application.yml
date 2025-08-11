@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:/S:/TOOLS/.Hudyma_projects/Uber2025/config
+management:
+  endpoint:
+    health:
+      show-details: always
