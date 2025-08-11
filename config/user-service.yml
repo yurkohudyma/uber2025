@@ -1,0 +1,29 @@
+server:
+  port: 9091
+
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: uber2025_userservice
+  graphql:
+    graphiql:
+      enabled: true
+      path: /graphiql
+  application:
+    name: user-service
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    feign: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env
