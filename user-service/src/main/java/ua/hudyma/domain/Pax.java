@@ -11,6 +11,7 @@ public class Pax {
     @Id
     private String id;
     private String userId;
+    private String city;
 
 
 }

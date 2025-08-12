@@ -1,0 +1,21 @@
+extend type Query {
+    driver(id: ID!): Driver
+    drivers: [Driver]
+}
+
+extend type Mutation {
+    createDriver(
+        licenseNumber: String!,
+        userId: String!,
+        carId: String!): Driver
+}
+
+type Driver {
+    id: ID!,
+    userId: String!,
+    licenseNumber: String!,
+    carId: String!
+}
+
+
+

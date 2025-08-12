@@ -1,0 +1,20 @@
+extend type Query {
+    pax (id: ID!): Pax
+    paxx: [Pax]
+}
+
+extend type Mutation {
+    createPax(
+        city: String!
+        userId: String!
+        ): Pax
+}
+
+type Pax {
+    id: ID!
+    userId: String!
+    city: String!
+}
+
+
+

@@ -1,3 +1,4 @@
 /.idea/
 /discovery-service/target/
 /config-service/target/
+/user-service/target/

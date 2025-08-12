@@ -1,13 +1,8 @@
-type Query {
-    user(id: ID!): User
-    users: [User]
+schema {
+    query: Query
+    mutation: Mutation
 }
 
-type Mutation {
-    createUser(email: String!): User
-}
+type Query
 
-type User {
-    id: ID!,
-    email: String!
-}
+type Mutation

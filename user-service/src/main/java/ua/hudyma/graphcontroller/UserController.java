@@ -11,11 +11,8 @@ import ua.hudyma.repository.UserRepository;
 import java.util.List;
 
 @Controller
-public class UserGraphQLController {
-
-    public UserGraphQLController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+@RequiredArgsConstructor
+public class UserController {
 
     private final UserRepository userRepository;
 

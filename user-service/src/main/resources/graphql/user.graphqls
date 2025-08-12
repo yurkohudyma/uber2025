@@ -1,0 +1,15 @@
+extend type Query {
+    user(id: ID!): User
+    users: [User]
+}
+
+extend type Mutation {
+    createUser(email: String!): User
+}
+
+type User {
+    id: ID!
+    email: String!
+    driverId: String
+    paxId: String
+}
