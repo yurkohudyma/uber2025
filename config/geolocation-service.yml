@@ -1,0 +1,25 @@
+server:
+  port: 9094
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/uber2025_geolocationservice
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: geolocation-service
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    feign: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env

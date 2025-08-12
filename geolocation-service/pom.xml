@@ -6,10 +6,9 @@
         <artifactId>Uber2025</artifactId>
         <version>0.0.1</version>
     </parent>
-    <artifactId>user-service</artifactId>
-    <name>user-service</name>
-    <version>0.0.1</version>
-    <description>Uber2025 UserService</description>
+    <artifactId>geolocation-service</artifactId>
+    <name>geolocation-service</name>
+    <description>Uber2025 GeolocatioService</description>
 
     <properties>
         <java.version>19</java.version>
@@ -17,7 +16,6 @@
         <maven.compiler.target>19</maven.compiler.target>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
     </properties>
-
 
     <dependencies>
 
@@ -33,15 +31,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -75,24 +67,6 @@
             <groupId>com.aventrix.jnanoid</groupId>
             <artifactId>jnanoid</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-            <version>3.5.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-graphql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.graphql-java-kickstart</groupId>
-            <artifactId>playground-spring-boot-starter</artifactId>
-            <version>11.1.0</version>
-        </dependency>
-
 
     </dependencies>
 
