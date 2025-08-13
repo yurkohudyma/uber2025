@@ -64,6 +64,7 @@
     <module>discovery-service</module>
     <module>user-service</module>
       <module>geolocation-service</module>
+      <module>ride-service</module>
   </modules>
 
 

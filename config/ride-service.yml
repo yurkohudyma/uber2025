@@ -1,15 +1,15 @@
 server:
-  port: 9094
+  port: 9097
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/uber2025_geolocationservice
+    url: jdbc:mysql://localhost:3306/uber2025_rideservice
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   application:
-    name: geolocation-service
+    name: ride-service
 
   jpa:
     hibernate:

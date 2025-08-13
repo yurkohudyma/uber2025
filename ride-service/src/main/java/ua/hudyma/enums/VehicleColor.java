@@ -1,0 +1,32 @@
+package ua.hudyma.enums;
+
+public enum VehicleColor {
+    BEIGE,
+    BLACK,
+    BLUE,
+    BROWN,
+    BURGUNDY,
+    CHAMPAGNE,
+    CHARCOAL,
+    GOLD,
+    GRAY,
+    GREEN,
+    IVORY,
+    LAVENDER,
+    MAROON,
+    MINT,
+    NAVY,
+    OLIVE,
+    ORANGE,
+    PINK,
+    PURPLE,
+    RED,
+    SALMON,
+    SILVER,
+    TAN,
+    TEAL,
+    TURQUOISE,
+    VIOLET,
+    WHITE,
+    YELLOW
+}

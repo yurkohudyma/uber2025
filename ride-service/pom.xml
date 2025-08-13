@@ -6,9 +6,9 @@
         <artifactId>Uber2025</artifactId>
         <version>0.0.1</version>
     </parent>
-    <artifactId>geolocation-service</artifactId>
-    <name>geolocation-service</name>
-    <description>Uber2025 GeolocatioService</description>
+    <artifactId>ride-service</artifactId>
+    <name>ride-service</name>
+    <description>Uber2025 CarService</description>
 
     <properties>
         <java.version>19</java.version>
@@ -18,6 +18,17 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -67,11 +78,9 @@
             <groupId>com.aventrix.jnanoid</groupId>
             <artifactId>jnanoid</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>9.3.0</version>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
         </dependency>
 
     </dependencies>

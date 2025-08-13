@@ -3,3 +3,4 @@
 /config-service/target/
 /user-service/target/
 /geolocation-service/src/main/resources/application.yml
+/geolocation-service/target/

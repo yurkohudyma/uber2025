@@ -38,9 +38,11 @@ public class DistanceService {
     public static RouteDistanceResponseDto getDistance(RouteDto routeDto) {
         String key = getStaticKey();
 
+        var departure = routeDto.departure();
+        var destination = routeDto.destination();
         String url = UriComponentsBuilder.fromHttpUrl("https://graphhopper.com/api/1/route")
-                .queryParam("point", routeDto.departure().latitude() + "," + routeDto.departure().longitude())
-                .queryParam("point", routeDto.destination().latitude() + "," + routeDto.destination().longitude())
+                .queryParam("point", departure.latitude() + "," + departure.longitude())
+                .queryParam("point", destination.latitude() + "," + destination.longitude())
                 .queryParam("vehicle", "car")
                 .queryParam("locale", "uk")
                 .queryParam("points_encoded", "false")
@@ -68,17 +70,8 @@ public class DistanceService {
             double lat = point.get(1).asDouble();
             routePointsCoordsList.add(new double[]{lat, lon});
         }
-
         writeGpxFile(routePointsCoordsList);
 
-
-
-        return new RouteDistanceResponseDto(distanceInMeters/1000, routePointsCoordsList);
-    }
-
-    public RouteDto getRandomCarPosition (RoutePoint cityCenter){
-        //todo calculate city radius
-        //todo randomize coords with the circle
-        return new RouteDto(null, null, Collections.EMPTY_LIST);
+        return new RouteDistanceResponseDto(distanceInMeters/1000, null);
     }
 }
