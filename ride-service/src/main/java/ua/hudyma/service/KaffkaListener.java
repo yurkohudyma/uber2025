@@ -10,5 +10,10 @@ public class KaffkaListener {
     public void listen(String message) {
         System.out.println("Отримано повідомлення: " + message);
     }
+
+   /* @KafkaListener(topics = "uber2025", groupId = "uber2025_rideservice")
+    public void listen(Object obj) {
+        System.out.println("Отримано об'єкт: " + obj);
+    }*/
 }
 

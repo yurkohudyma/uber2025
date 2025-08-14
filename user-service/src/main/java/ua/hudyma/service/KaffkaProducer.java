@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KaffkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplateObj;
 
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
+        kafkaTemplateObj.send (topic, new Object());
     }
 }
 

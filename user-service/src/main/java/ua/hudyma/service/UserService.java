@@ -10,6 +10,11 @@ import ua.hudyma.repository.UserRepository;
 @Log4j2
 public class UserService {
     private final UserRepository userRepository;
+
+    public boolean existsByDriverId(String driverId) {
+        return userRepository.existsByDriverId(driverId);
+    }
+
     public boolean existsByPaxId(String paxId) {
         return userRepository.existsByPaxId(paxId);
     }

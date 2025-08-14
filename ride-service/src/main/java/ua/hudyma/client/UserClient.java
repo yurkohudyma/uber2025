@@ -15,7 +15,16 @@ public class UserClient {
     public boolean paxExists(String paxId) {
         return Boolean.TRUE.equals(userServiceWebClient
                 .get()
-                .uri("/users/exists?paxId={paxId}", paxId)
+                .uri("/users/paxExists?paxId={paxId}", paxId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block());
+    }
+
+    public boolean driverExists(String driverId) {
+        return Boolean.TRUE.equals(userServiceWebClient
+                .get()
+                .uri("/users/driverExists?driverId={driverId}", driverId)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .block());

@@ -5,5 +5,7 @@ import ua.hudyma.domain.User;
 
 public interface UserRepository extends MongoRepository<User, String> {
 
+    boolean existsByDriverId(String driverId);
+
     boolean existsByPaxId(String paxId);
 }
