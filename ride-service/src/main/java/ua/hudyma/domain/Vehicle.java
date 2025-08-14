@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
+import ua.hudyma.dto.RoutePoint;
 import ua.hudyma.enums.VehicleClass;
 import ua.hudyma.enums.VehicleColor;
 import ua.hudyma.enums.VehicleModel;
@@ -38,9 +39,12 @@ public class Vehicle {
     @Column(nullable = false)
     private VehicleClass vehicleClass;
 
-    @OneToMany(mappedBy = "vehicle")
+    @OneToMany(mappedBy = "vehicle",
+               fetch = FetchType.EAGER)
     @Setter(AccessLevel.PRIVATE)
     @JsonIgnore
     List<Ride> rideList;
+    @Embedded
+    private RoutePoint currentPosition;
 
 }

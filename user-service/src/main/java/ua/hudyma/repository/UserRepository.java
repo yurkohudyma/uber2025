@@ -4,4 +4,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import ua.hudyma.domain.User;
 
 public interface UserRepository extends MongoRepository<User, String> {
+
+    boolean existsByPaxId(String paxId);
 }

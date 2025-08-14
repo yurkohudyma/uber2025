@@ -4,3 +4,4 @@
 /user-service/target/
 /geolocation-service/src/main/resources/application.yml
 /geolocation-service/target/
+/ride-service/target/

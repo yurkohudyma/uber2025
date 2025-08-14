@@ -9,8 +9,8 @@ import ua.hudyma.repository.UserRepository;
 @RequiredArgsConstructor
 @Log4j2
 public class UserService {
-    //private final UserRepository userRepository;
-
-
-
+    private final UserRepository userRepository;
+    public boolean existsByPaxId(String paxId) {
+        return userRepository.existsByPaxId(paxId);
+    }
 }

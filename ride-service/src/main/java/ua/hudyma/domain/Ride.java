@@ -11,6 +11,7 @@ import ua.hudyma.enums.RideStatus;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "rides")
@@ -33,15 +34,19 @@ public class Ride {
     private String paymentId;
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "latitude", column = @Column(name = "departure_latitude", nullable = false)),
-            @AttributeOverride(name = "longitude", column = @Column(name = "departure_longitude", nullable = false))
+            @AttributeOverride(name = "latitude",
+                    column = @Column(name = "departure_latitude", nullable = false)),
+            @AttributeOverride(name = "longitude",
+                    column = @Column(name = "departure_longitude", nullable = false))
     })
     private RoutePoint departure;
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "latitude", column = @Column(name = "destination_latitude", nullable = false)),
-            @AttributeOverride(name = "longitude", column = @Column(name = "destination_longitude", nullable = false))
+            @AttributeOverride(name = "latitude",
+                    column = @Column(name = "destination_latitude", nullable = false)),
+            @AttributeOverride(name = "longitude",
+                    column = @Column(name = "destination_longitude", nullable = false))
     })
     private RoutePoint destination;
 
@@ -53,6 +58,10 @@ public class Ride {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private RideStatus rideStatus;
+
+    @Transient
+    private List<double[]> routeList;
+    //todo fetch track from GraphHopper
 
 
 }

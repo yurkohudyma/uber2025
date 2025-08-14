@@ -24,11 +24,20 @@ spring:
       filter:
         enabled: true
 
+  kafka:
+    bootstrap-servers: localhost:9999
+    consumer:
+      group-id: uber2025_rideservice
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 logging:
   level:
     org.springframework.security: DEBUG
-    feign: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
     org.springframework.web: DEBUG
     org.springframework.web.servlet.DispatcherServlet: DEBUG
 

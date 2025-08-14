@@ -9,10 +9,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ua.hudyma.dto.RouteDistanceResponseDto;
 import ua.hudyma.dto.RouteDto;
-import ua.hudyma.dto.RoutePoint;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static ua.hudyma.service.GpxWriter.writeGpxFile;
