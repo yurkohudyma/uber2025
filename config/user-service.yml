@@ -32,6 +32,9 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.client.RestTemplate: INFO
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
 
 management:
   endpoints:

@@ -12,6 +12,8 @@ import ua.hudyma.dto.RouteDto;
 import ua.hudyma.dto.RoutePoint;
 import ua.hudyma.service.RideService;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/rides")
 @Log4j2
@@ -22,24 +24,37 @@ public class RideController {
     private final RideService rideService;
 
     @PostMapping
-    public ResponseEntity<Ride> addRide (@RequestBody RideRequestDto dto){
-        return ResponseEntity.ok(rideService.addRide (dto));
+    public ResponseEntity<Ride> addRide (
+            @RequestBody RideRequestDto dto){
+        return ResponseEntity.ok(
+                rideService.addRide (dto));
     }
 
     @GetMapping("/paxExists")
-    public boolean userExistsByPaxId (@RequestParam String paxId){
+    public boolean userExistsByPaxId (
+            @RequestParam String paxId){
         return rideService.existsByPaxId(paxId);
     }
 
     @GetMapping("/driverExists")
-    public boolean userExistsDriveByDriverId (@RequestParam String driverId){
+    public boolean userExistsDriveByDriverId (
+            @RequestParam String driverId){
         return rideService.existsByDriverId(driverId);
     }
 
     @PostMapping("/distance")
-    public ResponseEntity<Flux<RouteDistanceResponseDto>> getDistance
+    public ResponseEntity<RouteDistanceResponseDto> getDistanceWithTrack
             (@RequestBody RouteDto dto){
-        var result = rideService.getDistance(dto);
+        var result = rideService
+                .getDistanceWithTrack(dto);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/distance/noTrack")
+    public ResponseEntity<RouteDistanceResponseDto> getDistance
+            (@RequestBody RouteDto dto){
+        var result = rideService
+                .getDistance(dto);
         return ResponseEntity.ok(result);
     }
 }

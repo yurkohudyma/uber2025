@@ -1,2 +1,4 @@
 kafka:
   topic-name: uber2025
+uber2025:
+  base-price: 40

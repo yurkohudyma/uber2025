@@ -33,7 +33,8 @@ public class DistanceService {
         return staticKey;
     }
 
-    public static RouteDistanceResponseDto getDistance(RouteDto routeDto) {
+    public static RouteDistanceResponseDto getDistance(
+            RouteDto routeDto, boolean provideTrack) {
         String key = getStaticKey();
 
         var departure = routeDto.departure();
@@ -70,6 +71,10 @@ public class DistanceService {
         }
         writeGpxFile(routePointsCoordsList);
 
-        return new RouteDistanceResponseDto(distanceInMeters/1000, null);
+        return provideTrack ? new RouteDistanceResponseDto(
+                distanceInMeters/1000,
+                routePointsCoordsList):
+                new RouteDistanceResponseDto(
+                        distanceInMeters/1000, null);
     }
 }

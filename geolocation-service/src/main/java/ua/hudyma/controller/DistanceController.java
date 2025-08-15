@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.hudyma.dto.RouteDistanceResponseDto;
 import ua.hudyma.dto.RouteDto;
-import ua.hudyma.dto.RoutePoint;
 import ua.hudyma.dto.RouteRandomPoint;
-import ua.hudyma.service.LocationRandomizer;
+import ua.hudyma.service.DistanceService;
 
-import static ua.hudyma.service.DistanceService.getDistance;
 import static ua.hudyma.service.LocationRandomizer.randomizeLocation;
 
 @RestController
@@ -23,9 +21,15 @@ import static ua.hudyma.service.LocationRandomizer.randomizeLocation;
 public class DistanceController {
 
     @PostMapping
-    public ResponseEntity<RouteDistanceResponseDto> calculateDistance(
+    public ResponseEntity<RouteDistanceResponseDto> calculateDistanceWithTrack(
             @RequestBody RouteDto dto) {
-        return ResponseEntity.ok(getDistance(dto));
+        return ResponseEntity.ok(DistanceService.getDistance(dto, true));
+    }
+
+    @PostMapping("/noTrack")
+    public ResponseEntity<RouteDistanceResponseDto> calculateDistanceNoTrack(
+            @RequestBody RouteDto dto) {
+        return ResponseEntity.ok(DistanceService.getDistance(dto, false));
     }
 
     @PostMapping("/getRandom")

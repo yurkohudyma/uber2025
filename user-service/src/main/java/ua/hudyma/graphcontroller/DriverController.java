@@ -30,12 +30,13 @@ public class DriverController {
 
     @MutationMapping
     //@Transactional :: needs to relaunch mongo-server in replica-set mode, which supports TX
-    public Driver createDriver (@Argument String carId,
+    public Driver createDriver (@Argument Long vehicleId,
                                 @Argument String licenseNumber,
                                 @Argument String userId){
         var user = userRepository.findById(userId).orElseThrow();
         var driver = new Driver();
-        driver.setCarId(carId);
+        //todo rideClient.getVehicleById(vehicleId); --check vehicle exists
+        driver.setVehicleId(vehicleId);
         driver.setLicenseNumber(licenseNumber);
         driver.setUserId(userId);
         driverRepository.save(driver);

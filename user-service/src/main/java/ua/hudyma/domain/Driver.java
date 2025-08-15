@@ -16,5 +16,5 @@ public class Driver {
     private String id;
     private String userId;
     private String licenseNumber;
-    private String carId;
+    private Long vehicleId;
 }

@@ -5,16 +5,16 @@ extend type Query {
 
 extend type Mutation {
     createDriver(
-        licenseNumber: String!,
-        userId: String!,
-        carId: String!): Driver
+        licenseNumber: String!
+        userId: String!
+        vehicleId: ID!): Driver
 }
 
 type Driver {
     id: ID!,
-    userId: String!,
-    licenseNumber: String!,
-    carId: String!
+    userId: String!
+    licenseNumber: String!
+    vehicleId: ID!
 }
 
 

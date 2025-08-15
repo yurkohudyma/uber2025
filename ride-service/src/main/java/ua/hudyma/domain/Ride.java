@@ -24,12 +24,12 @@ public class Ride {
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     @CreationTimestamp
     private Date requestedOn;
-    @Column(nullable = false)
     private String driverId;
     @Column(nullable = false)
     private String paxId;
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "vehicle_id")
+    @ManyToOne
+    @JoinColumn(
+            name = "vehicle_id")
     private Vehicle vehicle;
     private String paymentId;
     @Embedded
@@ -50,7 +50,6 @@ public class Ride {
     })
     private RoutePoint destination;
 
-    @Column(nullable = false)
     @Positive
     @NotNull
     BigDecimal ridePrice;

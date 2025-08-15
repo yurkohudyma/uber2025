@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import ua.hudyma.client.GeoClient;
 import ua.hudyma.client.UserClient;
 import ua.hudyma.domain.Ride;
@@ -17,16 +16,18 @@ import ua.hudyma.repository.RideRepository;
 import ua.hudyma.repository.VehicleRepository;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import static java.lang.String.format;
+import static ua.hudyma.enums.RideStatus.IN_PROGRESS;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class RideService {
     @Value("${kafka.topic-name}")
-    public String topic;
+    private String topic;
+    @Value("${uber2025.base-price}")
+    private BigDecimal basePrice;
     private final RideRepository rideRepository;
     private final VehicleRepository vehicleRepository;
     private final KaffkaProducer kaffkaProducer;
@@ -36,44 +37,61 @@ public class RideService {
     @Transactional
     public Ride addRide(RideRequestDto requestDto) {
 
-        var driverId = requestDto.driverId();
+
         var paxId = requestDto.paxId();
-        var vehicleId = requestDto.vehicleId();
-        if (Objects.equals(driverId, paxId)) {
-            throw new IllegalArgumentException("Driver and pax COULD NOT BE identical");
-        }
-        if (!userClient.driverExists(driverId)){
-            var msg = format("User with driverId = %s has NOT BEEN FOUND", driverId);
-            log.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
+
+        var departure = requestDto.routeDto().departure();
+        var destination = requestDto.routeDto().destination();
+
         var ride = new Ride();
-        ride.setDeparture(requestDto.departure());
-        ride.setDestination(requestDto.destination());
-        ride.setDriverId(driverId);
+        ride.setDeparture(departure);
+        ride.setDestination(destination);
+
         ride.setRideStatus(RideStatus.REQUESTED);
 
-        if (!userClient.paxExists(paxId)){
+        if (!userClient.paxExists(paxId)) {
             var msg = format("User with paxId = %s has NOT BEEN FOUND", paxId);
             log.error(msg);
             throw new IllegalArgumentException(msg);
         }
         ride.setPaxId(paxId);
+        var vehiclePriceCoeff = requestDto
+                .vehicleClass()
+                .getPriceCoefficient();
 
-        var vehicle = vehicleRepository.findById(vehicleId).orElseThrow();
-        ride.setVehicle(vehicle);
-        var vehiclePriceCoeff = vehicle.getVehicleClass().getPriceCoefficient();
+        var distance = BigDecimal.valueOf(getDistance(requestDto.routeDto()).distance());
+        ride.setRidePrice(distance
+                .multiply(vehiclePriceCoeff)
+                .multiply(basePrice));
 
-
-        //todo get distance from geoservice
-        ride.setRidePrice(BigDecimal.valueOf(2.84029)// insert calculated data
-                .multiply(vehiclePriceCoeff));
         rideRepository.save(ride);
         log.info("ride {} has been saved", ride.getId());
-        vehicle.getRideList().add(ride);
-        var msg = format("ride %s requested", ride.getId());
+        var msg = format("ride %s requested by pax %s", ride.getId(), paxId);
         kaffkaProducer.sendMessage(topic, msg);
         return ride;
+    }
+
+    @Transactional
+    public boolean acceptRideByDriver(RideRequestDto rideRequestDto) {
+        var driverId = rideRequestDto.driverId();
+        if (!userClient.driverExists(driverId)) {
+            var msg = format("User with driverId = %s has NOT BEEN FOUND", driverId);
+            log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        var vehicleId = rideRequestDto.vehicleId();
+        var vehicle = vehicleRepository.findById(vehicleId).orElseThrow(
+                () -> new IllegalArgumentException("Vehicle has NOT BEEN FOUND"));
+        var ride = rideRepository.findById(rideRequestDto.rideId()).orElseThrow(
+                () -> new IllegalArgumentException("Ride has NOT BEEN FOUND"));
+
+        ride.setVehicle(vehicle);
+        vehicle.getRideList().add(ride);
+        var responseDtoTrack = geoClient
+                .getDistanceWithTrack(rideRequestDto.routeDto());
+        //todo engageVehicleMovementOnTrack();
+        ride.setRideStatus(IN_PROGRESS);
+        return true;
     }
 
     public boolean existsByPaxId(String paxId) {
@@ -88,7 +106,11 @@ public class RideService {
         return userClient.driverExists(driverId);
     }
 
-    public Flux<RouteDistanceResponseDto> getDistance (RouteDto dto){
+    public RouteDistanceResponseDto getDistance(RouteDto dto) {
         return geoClient.getDistance(dto);
+    }
+
+    public RouteDistanceResponseDto getDistanceWithTrack(RouteDto dto) {
+        return geoClient.getDistanceWithTrack(dto);
     }
 }

@@ -1,4 +1,8 @@
 package ua.hudyma.dto;
 
-public record RouteDistanceResponseDto(Double distance) {
+import java.util.List;
+
+public record RouteDistanceResponseDto(
+        Double distance,
+        List<double[]> routePoints) {
 }
