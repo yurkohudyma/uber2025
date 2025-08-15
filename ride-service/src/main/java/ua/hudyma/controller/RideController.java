@@ -4,15 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import ua.hudyma.domain.Ride;
 import ua.hudyma.dto.RideRequestDto;
 import ua.hudyma.dto.RouteDistanceResponseDto;
 import ua.hudyma.dto.RouteDto;
-import ua.hudyma.dto.RoutePoint;
+import ua.hudyma.repository.RideRepository;
+import ua.hudyma.repository.VehicleRepository;
 import ua.hudyma.service.RideService;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/rides")
@@ -22,6 +20,8 @@ import java.math.BigDecimal;
 public class RideController {
 
     private final RideService rideService;
+    private final VehicleRepository vehicleRepository;
+    private final RideRepository rideRepository;
 
     @PostMapping
     public ResponseEntity<Ride> addRide (
@@ -56,5 +56,10 @@ public class RideController {
         var result = rideService
                 .getDistance(dto);
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/launchToPaxRoute")
+    public ResponseEntity<Boolean> launchToPaxRoute (@RequestBody RideRequestDto dto){
+        return ResponseEntity.ok(rideService.acceptRideByDriver(dto));
     }
 }

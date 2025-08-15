@@ -2,3 +2,8 @@ kafka:
   topic-name: uber2025
 uber2025:
   base-price: 40
+  base-speed: 30
+  vehicle:
+    default-position:
+      latitude: 48.917111
+      longitude: 24.716745

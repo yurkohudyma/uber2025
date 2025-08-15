@@ -43,6 +43,7 @@ logging:
     org.springframework.web.client.RestTemplate: INFO
     com.netflix.discovery: WARN
     com.netflix.eureka: WARN
+    org.springframework.web.HttpLogging: WARN
 
 management:
   endpoints:

@@ -62,5 +62,14 @@ public class Ride {
     private List<double[]> routeList;
     //todo fetch track from GraphHopper
 
+    @Transient
+    private List<double[]> toPaxRouteList;
+    //todo fetch track from GraphHopper
+
+    @Transient
+    BigDecimal routeDistance;
+    @Transient
+    BigDecimal toPaxRouteDistance;
+
 
 }
