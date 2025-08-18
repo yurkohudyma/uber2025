@@ -10,15 +10,14 @@ import java.util.List;
 @Log4j2
 public class GpxWriter {
 
-    private static final String filePath = "S:\\TOOLS\\.Hudyma_projects\\track.gpx";
-
-    public static void writeGpxFile(List<double[]> coordinates) {
+    public static void writeGpxFile(List<double[]> coordinates, String suffix) {
+        String filePath = "S:\\TOOLS\\.Hudyma_projects\\" + suffix;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 
             writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            writer.write("<gpx version=\"1.1\" creator=\"YourApp\" xmlns=\"http://www.topografix.com/GPX/1/1\">\n");
+            writer.write("<gpx version=\"1.1\" creator=\"Uber2025\" xmlns=\"http://www.topografix.com/GPX/1/1\">\n");
             writer.write("  <trk>\n");
-            writer.write("    <name>Generated Track</name>\n");
+            writer.write("    <name>" + suffix + "</name>\n");
             writer.write("    <trkseg>\n");
 
             for (double[] coord : coordinates) {
@@ -31,7 +30,7 @@ public class GpxWriter {
             writer.write("  </trk>\n");
             writer.write("</gpx>\n");
 
-            log.info("✅ GPX-файл успішно записано: " + filePath);
+            log.info(" -->✅ GPX-файл успішно записано: " + filePath);
 
         } catch (IOException e) {
             log.error("❌ Помилка при записі GPX-файлу: " + e.getMessage());

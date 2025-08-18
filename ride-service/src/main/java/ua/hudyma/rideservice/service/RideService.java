@@ -14,6 +14,7 @@ import ua.hudyma.rideservice.dto.RideRequestDto;
 import ua.hudyma.rideservice.dto.RouteDistanceResponseDto;
 import ua.hudyma.rideservice.dto.RouteDto;
 import ua.hudyma.rideservice.dto.RoutePoint;
+import ua.hudyma.rideservice.enums.TrackDirection;
 import ua.hudyma.rideservice.exception.RideAllreadyAcceptedException;
 import ua.hudyma.rideservice.exception.RideNotAcceptedException;
 import ua.hudyma.rideservice.repository.RideRepository;
@@ -24,6 +25,7 @@ import java.math.RoundingMode;
 import java.time.LocalTime;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,7 +41,7 @@ public class RideService {
     private String topic;
     @Value("${uber2025.base-price}")
     private BigDecimal basePrice;
-    @Value("${uber2025.base-speed}")
+    @Value("${uber2025.vehicle.base-speed}")
     private BigDecimal baseSpeed;
     @Value("${uber2025.vehicle.default-position.latitude}")
     private BigDecimal defaultLatitude;
@@ -70,7 +72,7 @@ public class RideService {
         var vehiclePriceCoeff = requestDto
                 .vehicleClass()
                 .getPriceCoefficient();
-        var distance = BigDecimal.valueOf(getDistance(requestDto.routeDto()).distance());
+        var distance = BigDecimal.valueOf(getDistance(requestDto.routeDto(), false).distance());
         ride.setRouteDistance(distance);
         ride.setRidePrice(distance
                 .multiply(vehiclePriceCoeff)
@@ -136,9 +138,11 @@ public class RideService {
         ride.setVehicle(vehicle);
         ride.setDriverId(driverId);
         vehicle.getRideList().add(ride);
-        var routeDto = new RouteDto(ride.getDeparture(), ride.getDestination());
+        var routeDto = new RouteDto(ride.getDeparture(),
+                ride.getDestination(),
+                TrackDirection.ROUTE);
         var responseDtoTrack = geoClient
-                .getDistanceWithTrack(routeDto);
+                .getDistance(routeDto, false);
         var vehicleCurPos = vehicle.getCurrentPosition();
         if (vehicleCurPos.latitude() == 0 ||
                 vehicleCurPos.longitude() == 0) {
@@ -146,27 +150,29 @@ public class RideService {
                     new RoutePoint(
                             defaultLatitude.doubleValue(),
                             defaultLongitude.doubleValue()));
-            log.warn("current pos of vehicle {} is NA, setting default", vehicleId);
+            log.warn(" --> current pos of vehicle {} is NA, setting default", vehicleId);
         }
         var toPaxRouteDto = new RouteDto(
                 vehicleCurPos,
-                routeDto.departure());
+                ride.getDestination(),
+                TrackDirection.toPAX);
         ride.setRouteList(responseDtoTrack.routePoints());
 
         var toPaxRouteResponseDto = geoClient
-                .getDistanceWithTrack(toPaxRouteDto);
+                .getDistance(toPaxRouteDto, true);
         var toPaxRouteDistance = toPaxRouteResponseDto.distance();
         ride.setToPaxRouteDistance(BigDecimal.valueOf(toPaxRouteDistance));
         ride.setToPaxRouteList(toPaxRouteResponseDto.routePoints());
         //todo engageVehicleMovementOnTrack();
-        //dispatchVehicleToDeparturePoint(vehicle, ride);
+        dispatchVehicleToDeparturePoint(vehicle, ride);
         ride.setRideStatus(IN_PROGRESS);
         rideRepository.save(ride);
         return true;
     }
 
     private boolean isRideAccepted(RideRequestDto rideRequestDto) {
-        var rideStatus = rideRepository.findById(rideRequestDto.rideId()).orElseThrow(
+        var rideStatus = rideRepository
+                .findById(rideRequestDto.rideId()).orElseThrow(
                 () -> new IllegalArgumentException("Ride has NOT BEEN FOUND"))
                 .getRideStatus();
         return Objects.nonNull(rideRequestDto.vehicleId()) &&
@@ -176,41 +182,48 @@ public class RideService {
 
     public void dispatchVehicleToDeparturePoint(Vehicle vehicle, Ride ride) {
         var toPaxRouteDistance = ride.getToPaxRouteDistance();
+        log.info(" --> toPax Distance is {} km", toPaxRouteDistance);
         var timeToDestination = toPaxRouteDistance
                 .divide(baseSpeed, 9, RoundingMode.HALF_UP);
+        log.info(" --> Time to DEST = {} hrs", timeToDestination);
         var toPaxRouteList = ride.getToPaxRouteList();
         if (toPaxRouteList.isEmpty()){
             throw new NoSuchElementException("toPaxRouteList is EMPTY");
         }
         var time = convertToLocalTime(timeToDestination);
-        log.info("ETA = T + {}", time);
+        log.info(" --> Ride duration = {} min", time);
         var intervalSeconds = timeToDestination.doubleValue() * 3600 / toPaxRouteList.size();
-        log.info("-> interval of acquiring GPS data = {} sec", intervalSeconds);
+        log.info(" --> GPS update interval = {} sec", intervalSeconds);
 
-        try (var scheduler = newSingleThreadScheduledExecutor()) {
-            var route = toPaxRouteList
-                    .stream()
-                    .map(coords ->
-                            new RoutePoint(coords[0], coords[1]))
-                    .toList();
-            var index = new AtomicInteger();
+        var scheduler = Executors.newSingleThreadScheduledExecutor();
+        var route = toPaxRouteList
+                .stream()
+                .map(coords -> new RoutePoint(coords[0], coords[1]))
+                .toList();
+        var index = new AtomicInteger();
 
-            Runnable task = () -> {
-                int i = index.getAndIncrement();
-                if (i < route.size()) {
-                    vehicle.setCurrentPosition(route.get(i));
-                    vehicleRepository.save(vehicle);
-                    log.info("Moved to point {}", i);
-                } else {
-                    scheduler.shutdown();
-                }
-            };
-            scheduler.scheduleAtFixedRate(
-                    task, 0,
-                    Math.round(intervalSeconds),
-                    TimeUnit.SECONDS);
-        }
+        Runnable task = () -> {
+            int i = index.getAndIncrement();
+            if (i < route.size()) {
+                vehicle.setCurrentPosition(route.get(i));
+                log.info("Moved to point {} out of {} ({})",
+                        i,
+                        route.size(),
+                        route.get(i));
+            } else {
+                scheduler.shutdown();
+                log.info("Vehicle reached DEPART. Shutting down scheduler");
+            }
+        };
+        scheduler.scheduleAtFixedRate(
+                task, 0,
+                Math.round(intervalSeconds),
+                TimeUnit.SECONDS);
+        vehicleRepository.save(vehicle);
+        log.info("Vehicle {} position has moved to {}",
+                vehicle.getId(), vehicle.getCurrentPosition());
     }
+
 
     private LocalTime convertToLocalTime(BigDecimal timeToDestination) {
         int hours = timeToDestination.intValue();
@@ -233,11 +246,7 @@ public class RideService {
         return userClient.driverExists(driverId);
     }
 
-    public RouteDistanceResponseDto getDistance(RouteDto dto) {
-        return geoClient.getDistance(dto);
-    }
-
-    public RouteDistanceResponseDto getDistanceWithTrack(RouteDto dto) {
-        return geoClient.getDistanceWithTrack(dto);
+    public RouteDistanceResponseDto getDistance(RouteDto dto, boolean withTrack) {
+        return geoClient.getDistance(dto, withTrack);
     }
 }

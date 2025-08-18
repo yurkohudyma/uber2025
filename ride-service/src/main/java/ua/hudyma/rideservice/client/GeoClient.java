@@ -13,20 +13,11 @@ import ua.hudyma.rideservice.dto.RouteDto;
 public class GeoClient {
     private final WebClient geoServiceWebClient;
 
-    public RouteDistanceResponseDto getDistanceWithTrack(RouteDto dto){
+    public RouteDistanceResponseDto getDistance(RouteDto dto, boolean addTrack){
+        var uri = addTrack ? "/distance" : "/distance/noTrack";
         return geoServiceWebClient
                 .post()
-                .uri("/distance")
-                .bodyValue(dto)
-                .retrieve()
-                .bodyToMono(RouteDistanceResponseDto.class)
-                .block();
-    }
-
-    public RouteDistanceResponseDto getDistance(RouteDto dto){
-        return geoServiceWebClient
-                .post()
-                .uri("/distance/noTrack")
+                .uri(uri)
                 .bodyValue(dto)
                 .retrieve()
                 .bodyToMono(RouteDistanceResponseDto.class)

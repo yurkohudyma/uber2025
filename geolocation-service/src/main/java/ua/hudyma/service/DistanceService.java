@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ua.hudyma.dto.RouteDistanceResponseDto;
 import ua.hudyma.dto.RouteDto;
+import ua.hudyma.enums.TrackDirection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,8 @@ public class DistanceService {
 
         var departure = routeDto.departure();
         var destination = routeDto.destination();
-        String url = UriComponentsBuilder.fromHttpUrl("https://graphhopper.com/api/1/route")
+        String url = UriComponentsBuilder
+                .fromHttpUrl("https://graphhopper.com/api/1/route")
                 .queryParam("point", departure.latitude() + "," + departure.longitude())
                 .queryParam("point", destination.latitude() + "," + destination.longitude())
                 .queryParam("vehicle", "car")
@@ -50,7 +52,8 @@ public class DistanceService {
                 //.queryParam("type", "gpx")
                 .toUriString();
 
-        var response = restTemplate.getForEntity(url, JsonNode.class);
+        var response = restTemplate
+                .getForEntity(url, JsonNode.class);
         double distanceInMeters = response.getBody()
                 .get("paths")
                 .get(0)
@@ -69,7 +72,12 @@ public class DistanceService {
             double lat = point.get(1).asDouble();
             routePointsCoordsList.add(new double[]{lat, lon});
         }
-        writeGpxFile(routePointsCoordsList);
+
+        var trackSuffix = routeDto.trackDirection() ==
+                TrackDirection.ROUTE ?
+                "routeTrack.gpx" :
+                "toPaxTrack.gpx";
+        writeGpxFile(routePointsCoordsList, trackSuffix);
 
         return provideTrack ? new RouteDistanceResponseDto(
                 distanceInMeters/1000,

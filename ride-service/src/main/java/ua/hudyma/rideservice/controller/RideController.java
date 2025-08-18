@@ -8,6 +8,8 @@ import ua.hudyma.rideservice.domain.Ride;
 import ua.hudyma.rideservice.dto.RideRequestDto;
 import ua.hudyma.rideservice.dto.RouteDistanceResponseDto;
 import ua.hudyma.rideservice.dto.RouteDto;
+import ua.hudyma.rideservice.dto.RoutePoint;
+import ua.hudyma.rideservice.enums.TrackDirection;
 import ua.hudyma.rideservice.repository.RideRepository;
 import ua.hudyma.rideservice.repository.VehicleRepository;
 import ua.hudyma.rideservice.service.RideService;
@@ -46,7 +48,7 @@ public class RideController {
     public ResponseEntity<RouteDistanceResponseDto> getDistanceWithTrack
             (@RequestBody RouteDto dto){
         var result = rideService
-                .getDistanceWithTrack(dto);
+                .getDistance(dto, true);
         return ResponseEntity.ok(result);
     }
 
@@ -54,17 +56,43 @@ public class RideController {
     public ResponseEntity<RouteDistanceResponseDto> getDistance
             (@RequestBody RouteDto dto){
         var result = rideService
-                .getDistance(dto);
+                .getDistance(dto, false);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/launchToPaxRoute")
-    public ResponseEntity<Boolean> launchToPaxRoute (@RequestBody RideRequestDto dto){
-        return ResponseEntity.ok(rideService.acceptRideByDriver(dto));
+    public ResponseEntity<Boolean> launchToPaxRoute (
+            @RequestBody RideRequestDto dto){
+        return ResponseEntity.ok(rideService
+                .acceptRideByDriver(dto));
     }
 
     @PostMapping("/declineRide")
-    public ResponseEntity<Boolean> declineRideByDriver (@RequestBody RideRequestDto dto){
-        return ResponseEntity.ok(rideService.declineAcceptedRideByDriver(dto));
+    public ResponseEntity<Boolean> declineRideByDriver (
+            @RequestBody RideRequestDto dto){
+        return ResponseEntity.ok(rideService
+                .declineAcceptedRideByDriver(dto));
+    }
+
+    @GetMapping("/toPAX")
+    public ResponseEntity<RouteDistanceResponseDto> getDistanceWithTrack
+            (@RequestParam Long rideId){
+        var ride = rideRepository
+                .findById(rideId).orElseThrow(
+                        () -> new IllegalArgumentException
+                                ("Ride has NOT BEEN FOUND"));
+        var currentPosition = ride
+                .getVehicle().getCurrentPosition();
+        if (currentPosition == null){
+            throw new IllegalArgumentException
+                    (" --> vehicle cur position is NA");
+        }
+        var dto = new RouteDto(
+                currentPosition,
+                ride.getDeparture(),
+                TrackDirection.toPAX);
+        var result = rideService
+                .getDistance(dto, true);
+        return ResponseEntity.ok(result);
     }
 }

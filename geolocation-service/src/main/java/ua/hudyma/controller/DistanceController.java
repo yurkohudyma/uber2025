@@ -23,13 +23,15 @@ public class DistanceController {
     @PostMapping
     public ResponseEntity<RouteDistanceResponseDto> calculateDistanceWithTrack(
             @RequestBody RouteDto dto) {
-        return ResponseEntity.ok(DistanceService.getDistance(dto, true));
+        return ResponseEntity.ok(
+                DistanceService.getDistance(dto, true));
     }
 
     @PostMapping("/noTrack")
     public ResponseEntity<RouteDistanceResponseDto> calculateDistanceNoTrack(
             @RequestBody RouteDto dto) {
-        return ResponseEntity.ok(DistanceService.getDistance(dto, false));
+        return ResponseEntity.ok(
+                DistanceService.getDistance(dto, false));
     }
 
     @PostMapping("/getRandom")
