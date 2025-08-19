@@ -214,7 +214,7 @@ public class RideService {
             } else {
                 scheduler.shutdown();
                 log.info("Vehicle reached DEPART. Shutting down scheduler");
-                log.info("Vehicle {} position IS {}",
+                log.info("Vehicle's {} position = {}",
                         vehicle.getId(), vehicle.getCurrentPosition());
             }
         };
