@@ -21,14 +21,14 @@ import static ua.hudyma.service.LocationRandomizer.randomizeLocation;
 public class DistanceController {
 
     @PostMapping
-    public ResponseEntity<RouteDistanceResponseDto> calculateDistanceWithTrack(
+    public ResponseEntity<RouteDistanceResponseDto> calcDistanceWithTrack(
             @RequestBody RouteDto dto) {
         return ResponseEntity.ok(
                 DistanceService.getDistance(dto, true));
     }
 
     @PostMapping("/noTrack")
-    public ResponseEntity<RouteDistanceResponseDto> calculateDistanceNoTrack(
+    public ResponseEntity<RouteDistanceResponseDto> calcDistanceNoTrack(
             @RequestBody RouteDto dto) {
         return ResponseEntity.ok(
                 DistanceService.getDistance(dto, false));

@@ -154,7 +154,7 @@ public class RideService {
         }
         var toPaxRouteDto = new RouteDto(
                 vehicleCurPos,
-                ride.getDestination(),
+                ride.getDeparture(),
                 TrackDirection.toPAX);
         ride.setRouteList(responseDtoTrack.routePoints());
 
@@ -163,7 +163,6 @@ public class RideService {
         var toPaxRouteDistance = toPaxRouteResponseDto.distance();
         ride.setToPaxRouteDistance(BigDecimal.valueOf(toPaxRouteDistance));
         ride.setToPaxRouteList(toPaxRouteResponseDto.routePoints());
-        //todo engageVehicleMovementOnTrack();
         dispatchVehicleToDeparturePoint(vehicle, ride);
         ride.setRideStatus(IN_PROGRESS);
         rideRepository.save(ride);
@@ -186,6 +185,7 @@ public class RideService {
         var timeToDestination = toPaxRouteDistance
                 .divide(baseSpeed, 9, RoundingMode.HALF_UP);
         log.info(" --> Time to DEST = {} hrs", timeToDestination);
+        log.info(" --> constant velocity = {} km/h", baseSpeed);
         var toPaxRouteList = ride.getToPaxRouteList();
         if (toPaxRouteList.isEmpty()){
             throw new NoSuchElementException("toPaxRouteList is EMPTY");
@@ -206,6 +206,7 @@ public class RideService {
             int i = index.getAndIncrement();
             if (i < route.size()) {
                 vehicle.setCurrentPosition(route.get(i));
+                vehicleRepository.save(vehicle);
                 log.info("Moved to point {} out of {} ({})",
                         i,
                         route.size(),
@@ -213,15 +214,15 @@ public class RideService {
             } else {
                 scheduler.shutdown();
                 log.info("Vehicle reached DEPART. Shutting down scheduler");
+                log.info("Vehicle {} position IS {}",
+                        vehicle.getId(), vehicle.getCurrentPosition());
             }
         };
         scheduler.scheduleAtFixedRate(
                 task, 0,
                 Math.round(intervalSeconds),
                 TimeUnit.SECONDS);
-        vehicleRepository.save(vehicle);
-        log.info("Vehicle {} position has moved to {}",
-                vehicle.getId(), vehicle.getCurrentPosition());
+
     }
 
 
