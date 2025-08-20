@@ -1,3 +1,3 @@
-package ua.hudyma.rideservice.enums;
+package ua.hudyma.rideservice.constants;
 
 public enum TrackDirection {ROUTE, toPAX}

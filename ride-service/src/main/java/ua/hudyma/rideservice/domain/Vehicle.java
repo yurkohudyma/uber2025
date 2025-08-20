@@ -6,10 +6,10 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 import ua.hudyma.rideservice.dto.RoutePoint;
-import ua.hudyma.rideservice.enums.VehicleClass;
-import ua.hudyma.rideservice.enums.VehicleColor;
-import ua.hudyma.rideservice.enums.VehicleModel;
-import ua.hudyma.rideservice.enums.VehiclePropulsion;
+import ua.hudyma.rideservice.constants.VehicleClass;
+import ua.hudyma.rideservice.constants.VehicleColor;
+import ua.hudyma.rideservice.constants.VehicleModel;
+import ua.hudyma.rideservice.constants.VehiclePropulsion;
 
 import java.util.List;
 

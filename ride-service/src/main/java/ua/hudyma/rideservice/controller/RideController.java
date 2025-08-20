@@ -1,12 +1,15 @@
 package ua.hudyma.rideservice.controller;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.hudyma.rideservice.domain.Ride;
 import ua.hudyma.rideservice.dto.*;
-import ua.hudyma.rideservice.enums.TrackDirection;
+import ua.hudyma.rideservice.constants.RideStatus;
+import ua.hudyma.rideservice.constants.TrackDirection;
 import ua.hudyma.rideservice.repository.RideRepository;
 import ua.hudyma.rideservice.repository.VehicleRepository;
 import ua.hudyma.rideservice.service.RideService;
@@ -63,29 +66,45 @@ public class RideController {
     @PostMapping("/distanceForMap")
     public double getDistanceMap
             (@RequestBody RouteDto dto) {
-        log.info(" --> отримане ДТО: {}", dto);
         return rideService
                 .getDistanceMap(dto);
     }
 
+    @PostMapping("/initTransfer")
+    public void initPaxTransfer(@RequestBody RideRequestDto dto) {
+        rideService.initTransfer(dto);
+    }
 
 
     @PostMapping("/launchToPaxRoute")
-    public ResponseEntity<Boolean> launchToPaxRoute(
+    public ResponseEntity<RideStatus> launchToPaxRoute(
             @RequestBody RideRequestDto dto) {
         return ResponseEntity.ok(rideService
                 .acceptRideByDriver(dto));
     }
 
+    @GetMapping("/getStatus")
+    public RideStatus getRideStatus (@RequestParam Long rideId){
+        var ride = rideRepository
+                .findById(rideId)
+                .orElseThrow(
+                        () ->
+                                new IllegalArgumentException(
+                                        "Ride has NOT BEEN FOUND"));
+        return ride.getRideStatus();
+    }
+
+
     @PostMapping("/declineRide")
-    public ResponseEntity<Boolean> declineRideByDriver(
+    public ResponseEntity<RideStatus> declineRideByDriver(
             @RequestBody RideRequestDto dto) {
         return ResponseEntity.ok(rideService
                 .declineAcceptedRideByDriver(dto));
     }
 
     @GetMapping("/toPAX")
-    public ResponseEntity<RouteDistanceResponseDto> getDistanceWithTrack
+    public ResponseEntity<RouteDistanceResponseDto>
+    getDistanceWithTrack
             (@RequestParam Long rideId) {
         var ride = rideRepository
                 .findById(rideId).orElseThrow(

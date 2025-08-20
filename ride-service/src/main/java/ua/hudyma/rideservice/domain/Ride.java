@@ -8,7 +8,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import ua.hudyma.rideservice.dto.RoutePoint;
-import ua.hudyma.rideservice.enums.RideStatus;
+import ua.hudyma.rideservice.constants.RideStatus;
 
 import java.math.BigDecimal;
 import java.util.Date;

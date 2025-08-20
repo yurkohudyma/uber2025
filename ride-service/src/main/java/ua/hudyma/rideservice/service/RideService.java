@@ -14,9 +14,11 @@ import ua.hudyma.rideservice.dto.RideRequestDto;
 import ua.hudyma.rideservice.dto.RouteDistanceResponseDto;
 import ua.hudyma.rideservice.dto.RouteDto;
 import ua.hudyma.rideservice.dto.RoutePoint;
-import ua.hudyma.rideservice.enums.TrackDirection;
+import ua.hudyma.rideservice.constants.RideStatus;
+import ua.hudyma.rideservice.constants.TrackDirection;
 import ua.hudyma.rideservice.exception.RideAllreadyAcceptedException;
 import ua.hudyma.rideservice.exception.RideNotAcceptedException;
+import ua.hudyma.rideservice.exception.VehicleNotAssignedToRideException;
 import ua.hudyma.rideservice.repository.RideRepository;
 import ua.hudyma.rideservice.repository.VehicleRepository;
 import ua.hudyma.rideservice.util.DistanceCalculator;
@@ -24,15 +26,16 @@ import ua.hudyma.rideservice.util.DistanceCalculator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.String.format;
-import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
-import static ua.hudyma.rideservice.enums.RideStatus.*;
+import static ua.hudyma.rideservice.constants.RideStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +57,7 @@ public class RideService {
     private final KaffkaProducer kaffkaProducer;
     private final UserClient userClient;
     private final GeoClient geoClient;
+    private final RideStatusService rideStatusService;
 
     @Transactional
     public Ride addRide(RideRequestDto requestDto) {
@@ -85,13 +89,13 @@ public class RideService {
         return ride;
     }
 
-    public boolean declineAcceptedRideByDriver (RideRequestDto rideRequestDto){
+    public RideStatus declineAcceptedRideByDriver(RideRequestDto rideRequestDto) {
         var ride = rideRepository
                 .findById(rideRequestDto.rideId())
                 .orElseThrow(
                         () ->
                                 new IllegalArgumentException("Ride has NOT BEEN FOUND"));
-        if (!isRideAcceptedByTheDriver(ride.getDriverId(), rideRequestDto.driverId())){
+        if (isRideAcceptedByTheDriver(ride.getDriverId(), rideRequestDto.driverId())) {
             throw new RideNotAcceptedException("ride HAS not been accepted by this Driver");
         }
         ride.setRideStatus(DECLINED_BY_DRIVER);
@@ -100,25 +104,25 @@ public class RideService {
         var vehicle = vehicleRepository
                 .findById(rideRequestDto.vehicleId())
                 .orElseThrow(
-                () ->
-                        new IllegalArgumentException("Vehicle has NOT BEEN FOUND"));
+                        () ->
+                                new IllegalArgumentException("Vehicle has NOT BEEN FOUND"));
         vehicle.getRideList().remove(ride);
         rideRepository.save(ride);
         vehicleRepository.save(vehicle);
-        return true;
+        return DECLINED_BY_DRIVER;
     }
 
     private boolean isRideAcceptedByTheDriver(
             String actualDriverId, String requestDriverId) {
         if (actualDriverId != null && requestDriverId != null) {
-            return actualDriverId.equals(requestDriverId);
+            return !actualDriverId.equals(requestDriverId);
         }
         return false;
     }
 
     @Transactional
-    public boolean acceptRideByDriver(RideRequestDto rideRequestDto) {
-        if (isRideAccepted(rideRequestDto)){
+    public RideStatus acceptRideByDriver(RideRequestDto rideRequestDto) {
+        if (isRideAccepted(rideRequestDto)) {
             throw new RideAllreadyAcceptedException("ride HAS already been accepted");
         }
         var driverId = rideRequestDto.driverId();
@@ -133,8 +137,8 @@ public class RideService {
         var ride = rideRepository
                 .findById(rideRequestDto.rideId())
                 .orElseThrow(
-                () ->
-                        new IllegalArgumentException("Ride has NOT BEEN FOUND"));
+                        () ->
+                                new IllegalArgumentException("Ride has NOT BEEN FOUND"));
 
         ride.setVehicle(vehicle);
         ride.setDriverId(driverId);
@@ -151,7 +155,8 @@ public class RideService {
                     new RoutePoint(
                             defaultLatitude.doubleValue(),
                             defaultLongitude.doubleValue()));
-            log.warn(" --> current pos of vehicle {} is NA, setting default", vehicleId);
+            log.warn(" --> current pos of vehicle {} " +
+                    "is NA, setting default", vehicleId);
         }
         var toPaxRouteDto = new RouteDto(
                 vehicleCurPos,
@@ -166,47 +171,149 @@ public class RideService {
         ride.setToPaxRouteList(toPaxRouteResponseDto.routePoints());
         dispatchVehicleToDeparturePoint(vehicle, ride);
         ride.setRideStatus(IN_PROGRESS);
-        rideRepository.save(ride);
-        return true;
+        //rideRepository.save(ride);
+        return IN_PROGRESS;
     }
 
     private boolean isRideAccepted(RideRequestDto rideRequestDto) {
         var rideStatus = rideRepository
                 .findById(rideRequestDto.rideId()).orElseThrow(
-                () -> new IllegalArgumentException("Ride has NOT BEEN FOUND"))
+                        () -> new IllegalArgumentException
+                                ("Ride has NOT BEEN FOUND"))
                 .getRideStatus();
         return Objects.nonNull(rideRequestDto.vehicleId()) &&
-               Objects.nonNull(rideRequestDto.driverId()) &&
+                Objects.nonNull(rideRequestDto.driverId()) &&
                 rideStatus != REQUESTED && rideStatus != DECLINED_BY_DRIVER;
     }
 
     public void dispatchVehicleToDeparturePoint(Vehicle vehicle, Ride ride) {
         var toPaxRouteDistance = ride.getToPaxRouteDistance();
         log.info(" --> toPax Distance is {} km", toPaxRouteDistance);
-        var timeToDestination = toPaxRouteDistance
+        var timeToPickupPax = toPaxRouteDistance
                 .divide(baseSpeed, 9, RoundingMode.HALF_UP);
-        log.info(" --> Time to DEST = {} hrs", timeToDestination);
+        log.info(" --> Time to PICKUP = {} hrs", timeToPickupPax);
         log.info(" --> constant velocity = {} km/h", baseSpeed);
         var toPaxRouteList = ride.getToPaxRouteList();
-        if (toPaxRouteList.isEmpty()){
+        if (toPaxRouteList.isEmpty()) {
             throw new NoSuchElementException("toPaxRouteList is EMPTY");
         }
-        var time = convertToLocalTime(timeToDestination);
+        var time = convertToLocalTime(timeToPickupPax);
         log.info(" --> Ride duration = {} min", time);
-        var intervalSeconds = timeToDestination.doubleValue() * 3600 /
+        var intervalSeconds = timeToPickupPax.doubleValue() * 3600 /
                 toPaxRouteList.size();
         log.info(" --> GPS update interval = {} sec",
                 intervalSeconds);
 
         var scheduler = Executors
                 .newSingleThreadScheduledExecutor();
-        var route = toPaxRouteList
+        var route = convertListOfDoubleArraysIntoListOfRoutePoints(
+                toPaxRouteList);
+        var index = new AtomicInteger();
+
+        Runnable task = () -> runExecutor(vehicle, index, route, scheduler);
+        var interval = Math.round(intervalSeconds);
+        interval = interval <= 0 ? 1 : interval;
+        scheduler.scheduleAtFixedRate(
+                task, 0,
+                interval,
+                TimeUnit.SECONDS);
+    }
+
+    private void runExecutor(Vehicle vehicle,
+                             AtomicInteger index,
+                             List<RoutePoint> route,
+                             ScheduledExecutorService scheduler) {
+        int i = index.getAndIncrement();
+        if (i < route.size()) {
+            vehicle.setCurrentPosition(route.get(i));
+            vehicleRepository.save(vehicle);
+            log.info("Moved to point {} out of {} ({})",
+                    i,
+                    route.size(),
+                    route.get(i));
+        } else {
+            scheduler.shutdown();
+            log.info("Vehicle reached DEPART. Shutting down scheduler");
+            log.info("Vehicle {} position: [{}, {}]",
+                    vehicle.getVehicleRegistrationNumber(), vehicle
+                            .getCurrentPosition().latitude(),
+                    vehicle.getCurrentPosition().longitude());
+        }
+    }
+
+    private static List<RoutePoint> convertListOfDoubleArraysIntoListOfRoutePoints(
+            List<double[]> toPaxRouteList) {
+        return toPaxRouteList
                 .stream()
                 .map(coords -> new RoutePoint(
                         coords[0], coords[1]))
                 .toList();
+    }
+
+    @Transactional
+    public void initTransfer(RideRequestDto rideRequestDto) {
+        var rideId = rideRequestDto.rideId();
+        var ride = rideRepository
+                .findById(rideId)
+                .orElseThrow(
+                        () ->
+                                new IllegalArgumentException("Ride has NOT BEEN FOUND"));
+        if (isRideAcceptedByTheDriver(ride.getDriverId(), rideRequestDto.driverId())) {
+            throw new RideNotAcceptedException("ride HAS not been accepted by this Driver");
+        }
+        if (ride.getRideStatus() != IN_PROGRESS) {
+            log.error("ride doesn't seem to be IN_PROGRESS status " +
+                    "which could mean no DRIVER has accepted the ride");
+            throw new RideNotAcceptedException("ride HAS not been accepted by this Driver, " +
+                    "ride status is INVALID");
+        }
+        rideStatusService.setRideStatusOnBoardAndFlush(rideId);
+        ride.setRideStatus(PAX_ONBOARD);
+        var routeDistance = ride.getRouteDistance();
+        RouteDistanceResponseDto responseDto = null;
+        if (routeDistance == null) {
+            var routeDto = new RouteDto(
+                    ride.getDeparture(),
+                    ride.getDestination(),
+                    null);
+            responseDto = getDistance(
+                    routeDto, true);
+        }
+        if (responseDto == null) {
+            throw new IllegalArgumentException("Fatal error fetching DATA FROM GRAPHHOPPER");
+        }
+        routeDistance = BigDecimal.valueOf(responseDto.distance());
+        log.info(" --> Distance to Destination is {} km", routeDistance);
+        ride.setRouteDistance(routeDistance);
+
+        var routeList = ride.getRouteList();
+        if (routeList == null || routeList.isEmpty()) {
+            routeList = responseDto.routePoints();
+            if (routeList == null || routeList.isEmpty()) {
+                throw new NoSuchElementException("routeList is NULL or EMPTY");
+            }
+        }
+        var timeToDestination = routeDistance.divide(
+                baseSpeed, 9, RoundingMode.HALF_UP);
+        log.info(" --> Time to PICKUP = {} hrs", timeToDestination);
+        var time = convertToLocalTime(timeToDestination);
+        log.info(" --> Transfer duration = {} min", time);
+        log.info(" --> constant velocity = {} km/h", baseSpeed);
+        var intervalSeconds = timeToDestination.doubleValue() * 3600 /
+                routeList.size();
+        log.info(" --> GPS update interval = {} sec",
+                intervalSeconds);
+        var route = convertListOfDoubleArraysIntoListOfRoutePoints(routeList);
+
         var index = new AtomicInteger();
 
+        var vehicle = ride.getVehicle();
+        if (vehicle == null) {
+            throw new VehicleNotAssignedToRideException(
+                    "Attempt to process ride with no vehicle ASSIGNED");
+        }
+        var scheduler = Executors
+                .newSingleThreadScheduledExecutor();
         Runnable task = () -> {
             int i = index.getAndIncrement();
             if (i < route.size()) {
@@ -218,18 +325,22 @@ public class RideService {
                         route.get(i));
             } else {
                 scheduler.shutdown();
-                log.info("Vehicle reached DEPART. Shutting down scheduler");
-                log.info("Vehicle's {} position = {}",
-                        vehicle.getId(), vehicle.getCurrentPosition());
+                log.info("Vehicle reached DESTINATION. Shutting down scheduler");
+                log.info("Vehicle {} position: [{}, {}]",
+                        vehicle.getVehicleRegistrationNumber(), vehicle
+                                .getCurrentPosition().latitude(),
+                        vehicle.getCurrentPosition().longitude());
             }
         };
+        var interval = Math.round(intervalSeconds);
+        interval = interval <= 0 ? 1 : interval;
         scheduler.scheduleAtFixedRate(
                 task, 0,
-                Math.round(intervalSeconds),
+                interval,
                 TimeUnit.SECONDS);
-
+        ride.setRideStatus(COMPLETE);
+        //return COMPLETE;
     }
-
 
     private LocalTime convertToLocalTime(BigDecimal timeToDestination) {
         int hours = timeToDestination.intValue();

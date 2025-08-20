@@ -1,6 +1,6 @@
 package ua.hudyma.rideservice.dto;
 
-import ua.hudyma.rideservice.enums.VehicleClass;
+import ua.hudyma.rideservice.constants.VehicleClass;
 
 public record RideRequestDto(RouteDto routeDto,
                              String paxId,

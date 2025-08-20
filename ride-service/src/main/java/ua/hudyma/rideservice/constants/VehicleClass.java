@@ -1,4 +1,4 @@
-package ua.hudyma.rideservice.enums;
+package ua.hudyma.rideservice.constants;
 
 import lombok.RequiredArgsConstructor;
 
