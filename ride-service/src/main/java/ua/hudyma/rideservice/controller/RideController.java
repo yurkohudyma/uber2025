@@ -56,8 +56,19 @@ public class RideController {
             (@RequestBody RouteDto dto) {
         var result = rideService
                 .getDistance(dto, false);
+        log.info(" --> отримане ДТО: {}", dto);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/distanceForMap")
+    public double getDistanceMap
+            (@RequestBody RouteDto dto) {
+        log.info(" --> отримане ДТО: {}", dto);
+        return rideService
+                .getDistanceMap(dto);
+    }
+
+
 
     @PostMapping("/launchToPaxRoute")
     public ResponseEntity<Boolean> launchToPaxRoute(

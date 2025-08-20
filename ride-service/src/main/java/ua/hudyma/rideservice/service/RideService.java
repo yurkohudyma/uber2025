@@ -19,6 +19,7 @@ import ua.hudyma.rideservice.exception.RideAllreadyAcceptedException;
 import ua.hudyma.rideservice.exception.RideNotAcceptedException;
 import ua.hudyma.rideservice.repository.RideRepository;
 import ua.hudyma.rideservice.repository.VehicleRepository;
+import ua.hudyma.rideservice.util.DistanceCalculator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -192,13 +193,17 @@ public class RideService {
         }
         var time = convertToLocalTime(timeToDestination);
         log.info(" --> Ride duration = {} min", time);
-        var intervalSeconds = timeToDestination.doubleValue() * 3600 / toPaxRouteList.size();
-        log.info(" --> GPS update interval = {} sec", intervalSeconds);
+        var intervalSeconds = timeToDestination.doubleValue() * 3600 /
+                toPaxRouteList.size();
+        log.info(" --> GPS update interval = {} sec",
+                intervalSeconds);
 
-        var scheduler = Executors.newSingleThreadScheduledExecutor();
+        var scheduler = Executors
+                .newSingleThreadScheduledExecutor();
         var route = toPaxRouteList
                 .stream()
-                .map(coords -> new RoutePoint(coords[0], coords[1]))
+                .map(coords -> new RoutePoint(
+                        coords[0], coords[1]))
                 .toList();
         var index = new AtomicInteger();
 
@@ -249,5 +254,9 @@ public class RideService {
 
     public RouteDistanceResponseDto getDistance(RouteDto dto, boolean withTrack) {
         return geoClient.getDistance(dto, withTrack);
+    }
+
+    public double getDistanceMap(RouteDto dto) {
+        return DistanceCalculator.haversine(dto);
     }
 }
