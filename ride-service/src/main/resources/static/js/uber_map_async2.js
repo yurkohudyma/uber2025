@@ -86,8 +86,7 @@ function pollRideStatus(rideId, arrivalCoords) {
   const statusCheckInterval = setInterval(async () => {
     try {
       const res = await fetch(`/rides/getStatus?rideId=${rideId}`);
-      const status = await res.text(); // або res.json(), якщо бекенд повертає JSON
-
+      const status = await res.text();
       console.log("📦 Поточний статус поїздки:", status);
 
       if (status === 'PAX_ONBOARD') {
@@ -98,10 +97,8 @@ function pollRideStatus(rideId, arrivalCoords) {
     } catch (err) {
       console.error('❌ Помилка при перевірці статусу:', err);
     }
-  }, 2000); // перевірка кожні 2 секунди
+  }, 2000);
 }
-
-
 
 function startTracking(arrivalCoords) {
   return new Promise((resolve) => {
@@ -110,19 +107,15 @@ function startTracking(arrivalCoords) {
         try {
           const currentPosition = await fetch('/rides/getPosition?vehicleId=1')
             .then(res => res.json());
-
           const currentLatLng = {
             lat: currentPosition[0],
             lng: currentPosition[1]
           };
-
           console.log("📍 Отримано позицію:", currentLatLng);
-
           if (taxiMarker) {
             taxiMarker.setLatLng(currentLatLng);
             const distance = await getDistanceBackend(currentLatLng, arrivalCoords);
             console.log("📏 Відстань до призначення:", distance + " км");
-
             if (distance < 0.01) {
               console.log("🚕 Таксі прибуло, зупиняємо оновлення");
               clearInterval(updateInterval);
@@ -136,7 +129,6 @@ function startTracking(arrivalCoords) {
     }, 2000);
   });
 }
-
 
 // Запускаємо ініціалізацію карти
 initializeMap();

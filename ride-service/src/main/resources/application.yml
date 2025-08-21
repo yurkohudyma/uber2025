@@ -7,3 +7,9 @@ uber2025:
       latitude: 48.917111
       longitude: 24.716745
     base-speed: 600
+  cities:
+    ivano-frankivsk:
+      centre:
+        latitude: 48.917111
+        longitude: 24.716745
+      city-square: 83.73

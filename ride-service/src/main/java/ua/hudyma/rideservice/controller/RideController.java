@@ -71,8 +71,8 @@ public class RideController {
     }
 
     @PostMapping("/initTransfer")
-    public void initPaxTransfer(@RequestBody RideRequestDto dto) {
-        rideService.initTransfer(dto);
+    public boolean initPaxTransfer(@RequestBody RideRequestDto dto) {
+        return rideService.initTransfer(dto);
     }
 
 
@@ -185,5 +185,13 @@ public class RideController {
                         ("Vehicle has NOT BEEN FOUND"));
         return List.of(vehicle.getCurrentPosition().latitude(),
                 vehicle.getCurrentPosition().longitude());
+    }
+
+    //todo get All vehicles in the city radius
+    //todo find the closest one to the random pax calling
+
+    @GetMapping("/getAllNearbyVehiclesId")
+    public List<Long> getAllVehiclesWithinDefaultCityRadius (){
+        return rideService.getAllVehicleWithinCityRadius ();
     }
 }
