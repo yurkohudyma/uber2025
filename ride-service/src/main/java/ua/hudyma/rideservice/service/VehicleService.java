@@ -22,6 +22,11 @@ public class VehicleService {
     public Vehicle addVehicle(Vehicle vehicle) {
         return vehicleRepository.save(vehicle);
     }
+
+    public boolean existsById(Long vehicleId) {
+        return vehicleRepository.existsById(vehicleId);
+    }
+
     public List<Ride> getVehicleRides(Long vehicleId) {
         var vehicle = vehicleRepository.findById(vehicleId).orElseThrow();
         return vehicle.getRideList();

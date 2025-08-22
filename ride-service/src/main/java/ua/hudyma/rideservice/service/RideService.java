@@ -212,7 +212,7 @@ public class RideService {
         var index = new AtomicInteger();
 
         Runnable task = () -> runExecutor(vehicle, index,
-                route, scheduler, "DEPART");
+                route, scheduler, "DEPART", ride);
         var interval = Math.round(intervalSeconds);
         interval = interval <= 0 ? 1 : interval;
         scheduler.scheduleAtFixedRate(
@@ -225,7 +225,7 @@ public class RideService {
     private void runExecutor(Vehicle vehicle, AtomicInteger index,
                              List<RoutePoint> route,
                              ScheduledExecutorService scheduler,
-                             String destIdentifier) {
+                             String destIdentifier, Ride ride) {
         int i = index.getAndIncrement();
         if (i < route.size()) {
             vehicle.setCurrentPosition(route.get(i));
@@ -241,6 +241,11 @@ public class RideService {
                     vehicle.getVehicleRegistrationNumber(), vehicle
                             .getCurrentPosition().latitude(),
                     vehicle.getCurrentPosition().longitude());
+            if (getDistanceHaversine(new RouteDto(
+                    vehicle.getCurrentPosition(), route.get(route.size() - 1), null)) <= 0.01){
+                ride.setRideStatus(COMPLETE);
+                rideRepository.save(ride);
+            }
         }
     }
 
@@ -307,16 +312,14 @@ public class RideService {
         var scheduler = Executors
                 .newSingleThreadScheduledExecutor();
         Runnable task = () -> runExecutor(vehicle, index,
-                route, scheduler, "DESTINATION");
+                route, scheduler, "DESTINATION", null);
         var interval = Math.round(intervalSeconds);
         interval = interval <= 0 ? 1 : interval;
         scheduler.scheduleAtFixedRate(
                 task, 0,
                 interval,
                 TimeUnit.SECONDS);
-        //todo when getDistance(car, dest) <10 m -> ride.setRideStatus(COMPLETE);
         return true;
-        //return COMPLETE;
     }
 
     private static List<RoutePoint> convertListOfDoubleArraysIntoListOfRoutePoints(
@@ -353,7 +356,7 @@ public class RideService {
         return geoClient.getDistance(dto, withTrack);
     }
 
-    public double getDistanceMap(RouteDto dto) {
+    public double getDistanceHaversine(RouteDto dto) {
         return DistanceCalculator.haversine(dto);
     }
 
@@ -384,7 +387,7 @@ public class RideService {
                 .findAll()
                 .stream()
                 .map(vehicle -> {
-                    Double distance = getDistanceMap(new RouteDto(
+                    Double distance = getDistanceHaversine(new RouteDto(
                             new RoutePoint(vehicle.getCurrentPosition().latitude(),
                                     vehicle.getCurrentPosition().longitude()),
                             new RoutePoint(centreLatitude, centreLongitude),

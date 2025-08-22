@@ -11,6 +11,7 @@ import ua.hudyma.rideservice.constants.TrackDirection;
 import ua.hudyma.rideservice.repository.RideRepository;
 import ua.hudyma.rideservice.repository.VehicleRepository;
 import ua.hudyma.rideservice.service.RideService;
+import ua.hudyma.rideservice.service.VehicleService;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class RideController {
     private final RideService rideService;
     private final VehicleRepository vehicleRepository;
     private final RideRepository rideRepository;
+    private final VehicleService vehicleService;
 
     @PostMapping
     public ResponseEntity<Ride> addRide(
@@ -42,6 +44,12 @@ public class RideController {
     public boolean userExistsDriveByDriverId(
             @RequestParam String driverId) {
         return rideService.existsByDriverId(driverId);
+    }
+
+    @GetMapping("/vehicleExists")
+    public boolean vehicleExistsByVehicleId (
+            @RequestParam Long vehicleId){
+        return vehicleService.existsById(vehicleId);
     }
 
     @PostMapping("/distance")
@@ -65,7 +73,7 @@ public class RideController {
     public double getDistanceMap
             (@RequestBody RouteDto dto) {
         return rideService
-                .getDistanceMap(dto);
+                .getDistanceHaversine(dto);
     }
 
     @PostMapping("/initTransfer")
@@ -91,7 +99,6 @@ public class RideController {
                                         "Ride has NOT BEEN FOUND"));
         return ride.getRideStatus();
     }
-
 
     @PostMapping("/declineRide")
     public ResponseEntity<RideStatus> declineRideByDriver(
@@ -184,9 +191,6 @@ public class RideController {
         return List.of(vehicle.getCurrentPosition().latitude(),
                 vehicle.getCurrentPosition().longitude());
     }
-
-    //todo get All vehicles in the city radius
-    //todo find the closest one to the random pax calling
 
     @GetMapping("/getAllNearbyVehiclesId")
     public List<DistanceResponseDto> getAllVehiclesWithinDefaultCityRadius (){
