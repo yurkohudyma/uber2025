@@ -23,10 +23,7 @@ import ua.hudyma.rideservice.util.DistanceCalculator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -54,8 +51,7 @@ public class RideService {
     @Value("${uber2025.cities.ivano-frankivsk.centre.longitude}")
     private Double centreLongitude;
     @Value("${uber2025.cities.ivano-frankivsk.city-square}")
-    private Double citySquare;
-
+    private double citySquare;
 
     private final RideRepository rideRepository;
     private final VehicleRepository vehicleRepository;
@@ -361,18 +357,44 @@ public class RideService {
         return DistanceCalculator.haversine(dto);
     }
 
-    public List<Long> getAllVehicleWithinCityRadius() {
-        var defCityRadius = Math.sqrt(citySquare / Math.PI);
+    public List<DistanceResponseDto> getAllVehiclesWithinCityRadius() {
+        double defCityRadius = Math.sqrt(citySquare / Math.PI);
         return vehicleRepository
                 .findAll()
                 .stream()
-                .filter(vehicle ->
-                        getDistance(new RouteDto(
-                                new RoutePoint(vehicle.getCurrentPosition().latitude(),
-                                                        vehicle.getCurrentPosition().longitude()),
-                                new RoutePoint(centreLatitude, centreLongitude),
-                                null), false).distance() <= defCityRadius)
-                .map(Vehicle::getId)
+                .map(vehicle -> {
+                    double distance = getDistance(
+                            new RouteDto(
+                                    new RoutePoint(vehicle.getCurrentPosition().latitude(),
+                                            vehicle.getCurrentPosition().longitude()),
+                                    new RoutePoint(centreLatitude, centreLongitude),
+                                    null
+                            ),
+                            false
+                    ).distance();
+                    return new AbstractMap.SimpleEntry<>(vehicle, distance);
+                })
+                .filter(entry -> entry.getValue() <= defCityRadius)
+                .map(entry -> new DistanceResponseDto( entry.getValue(), entry.getKey().getId()))
                 .toList();
+    }
+
+    public Optional<DistanceResponseDto> getNearestVehicleToDefCentre() {
+        return vehicleRepository
+                .findAll()
+                .stream()
+                .map(vehicle -> {
+                    Double distance = getDistanceMap(new RouteDto(
+                            new RoutePoint(vehicle.getCurrentPosition().latitude(),
+                                    vehicle.getCurrentPosition().longitude()),
+                            new RoutePoint(centreLatitude, centreLongitude),
+                            null
+                    ));
+                    return new AbstractMap.SimpleEntry<>(distance, vehicle.getId());
+                })
+                .min(Map.Entry.comparingByValue())
+                .map(entry -> new DistanceResponseDto(
+                        entry.getKey(),
+                        entry.getValue()));
     }
 }

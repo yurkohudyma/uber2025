@@ -5,3 +5,4 @@
 /geolocation-service/src/main/resources/application.yml
 /geolocation-service/target/
 /ride-service/target/
+/geolocation-service/gh/ukraine-latest.osm.pbf

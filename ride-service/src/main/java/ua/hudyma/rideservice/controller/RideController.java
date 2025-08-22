@@ -1,9 +1,7 @@
 package ua.hudyma.rideservice.controller;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.hudyma.rideservice.domain.Ride;
@@ -191,7 +189,12 @@ public class RideController {
     //todo find the closest one to the random pax calling
 
     @GetMapping("/getAllNearbyVehiclesId")
-    public List<Long> getAllVehiclesWithinDefaultCityRadius (){
-        return rideService.getAllVehicleWithinCityRadius ();
+    public List<DistanceResponseDto> getAllVehiclesWithinDefaultCityRadius (){
+        return rideService.getAllVehiclesWithinCityRadius();
+    }
+
+    @GetMapping("/getTheNearestVehicle")
+    public DistanceResponseDto getTheNearestVehicleFromDefCityRadius (){
+        return rideService.getNearestVehicleToDefCentre().orElseThrow();
     }
 }
