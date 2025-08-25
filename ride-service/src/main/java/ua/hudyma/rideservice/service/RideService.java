@@ -241,7 +241,7 @@ public class RideService {
                     vehicle.getVehicleRegistrationNumber(), vehicle
                             .getCurrentPosition().latitude(),
                     vehicle.getCurrentPosition().longitude());
-            if (getDistanceHaversine(new RouteDto(
+            if (destIdentifier.equals("DESTINATION") && getDistanceHaversine(new RouteDto(
                     vehicle.getCurrentPosition(), route.get(route.size() - 1), null)) <= 0.01){
                 ride.setRideStatus(COMPLETE);
                 rideRepository.save(ride);

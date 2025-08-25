@@ -3,14 +3,12 @@ package ua.hudyma.geolocationservice.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.hudyma.geolocationservice.dto.RouteDistanceResponseDto;
 import ua.hudyma.geolocationservice.dto.RouteDto;
 import ua.hudyma.geolocationservice.dto.RouteRandomPoint;
 import ua.hudyma.geolocationservice.service.DistanceService;
+import ua.hudyma.geolocationservice.service.GraphHopperService;
 
 import static ua.hudyma.geolocationservice.service.LocationRandomizer.randomizeLocation;
 
@@ -19,6 +17,18 @@ import static ua.hudyma.geolocationservice.service.LocationRandomizer.randomizeL
 @RequiredArgsConstructor
 @Log4j2
 public class DistanceController {
+
+    private final GraphHopperService graphHopperService;
+
+    @GetMapping("checkVehiclePassable")
+    public ResponseEntity<Boolean> checkPassabilityForVehicle (@RequestBody RouteDto routeDto){
+        return ResponseEntity.ok(graphHopperService.isPointAccessibleForVehicle(routeDto));
+    }
+
+    @PostMapping("checkVehiclePassableAPI")
+    public ResponseEntity<StringBuilder> checkRoutePassableForVehicleAPI (@RequestBody RouteDto routeDto){
+        return ResponseEntity.ok(graphHopperService.isRoutePassable((routeDto)));
+    }
 
     @PostMapping
     public ResponseEntity<RouteDistanceResponseDto> calcDistanceWithTrack(
