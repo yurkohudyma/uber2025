@@ -19,13 +19,22 @@ import java.util.List;
 @RequestMapping("/rides")
 @Log4j2
 @RequiredArgsConstructor
-
 public class RideController {
 
     private final RideService rideService;
     private final VehicleRepository vehicleRepository;
     private final RideRepository rideRepository;
     private final VehicleService vehicleService;
+
+    @GetMapping("/{rideId}")
+    public RideResponseDto getRideById (@PathVariable Long rideId){
+        var ride = rideRepository.findById(rideId).orElseThrow(
+                () -> new IllegalArgumentException("ride NOT found by id=" + rideId));
+        return new RideResponseDto (
+                ride.getId(),
+                ride.getDriverId(),
+                ride.getPaxId());
+    }
 
     @PostMapping
     public ResponseEntity<Ride> addRide(
