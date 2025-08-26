@@ -6,3 +6,10 @@
 /geolocation-service/target/
 /ride-service/target/
 /geolocation-service/gh/ukraine-latest.osm.pbf
+/geolocation-service/gh/graphFolderPath/edgekv_keys
+/geolocation-service/gh/graphFolderPath/edgekv_vals
+/geolocation-service/gh/graphFolderPath/edges
+/geolocation-service/gh/graphFolderPath/geometry
+/geolocation-service/gh/graphFolderPath/location_index
+/geolocation-service/gh/graphFolderPath/nodes
+/geolocation-service/gh/graphFolderPath/properties

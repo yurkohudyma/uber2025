@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.hudyma.geolocationservice.dto.RouteDistanceResponseDto;
 import ua.hudyma.geolocationservice.dto.RouteDto;
+import ua.hudyma.geolocationservice.dto.RoutePoint;
 import ua.hudyma.geolocationservice.dto.RouteRandomPoint;
 import ua.hudyma.geolocationservice.service.DistanceService;
 import ua.hudyma.geolocationservice.service.GraphHopperService;
@@ -20,14 +21,23 @@ public class DistanceController {
 
     private final GraphHopperService graphHopperService;
 
-    @GetMapping("checkVehiclePassable")
-    public ResponseEntity<Boolean> checkPassabilityForVehicle (@RequestBody RouteDto routeDto){
-        return ResponseEntity.ok(graphHopperService.isPointAccessibleForVehicle(routeDto));
+    @PostMapping("/isPointAtRoad")
+    public ResponseEntity<Boolean> isPointAtRoad (@RequestBody RoutePoint routePoint){
+        return ResponseEntity.ok(graphHopperService.isPointAtRoad(routePoint));
     }
 
-    @PostMapping("checkVehiclePassableAPI")
-    public ResponseEntity<StringBuilder> checkRoutePassableForVehicleAPI (@RequestBody RouteDto routeDto){
-        return ResponseEntity.ok(graphHopperService.isRoutePassable((routeDto)));
+    @GetMapping("/checkVehiclePassable")
+    public ResponseEntity<Boolean> checkPassabilityForVehicle (
+            @RequestBody RouteDto routeDto){
+        return ResponseEntity.ok(graphHopperService
+                .isPointAccessibleForVehicle(routeDto));
+    }
+
+    @PostMapping("/checkVehiclePassableAPI")
+    public ResponseEntity<StringBuilder> checkRoutePassableForVehicleAPI (
+            @RequestBody RouteDto routeDto){
+        return ResponseEntity.ok(graphHopperService
+                .isRoutePassableAPI((routeDto)));
     }
 
     @PostMapping
