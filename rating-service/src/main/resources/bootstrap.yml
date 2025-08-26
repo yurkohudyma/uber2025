@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: rating-service
+  cloud:
+    config:
+      uri: http://localhost:9090
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+kafka:
+  topic-name: uber2025
