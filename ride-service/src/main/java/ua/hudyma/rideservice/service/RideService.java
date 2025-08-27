@@ -122,6 +122,19 @@ public class RideService {
                 .orElse(false);
     }
 
+    @Transactional
+    public boolean upsertRidePaymentId(PaymentRequestDto paymentRequestDto) {
+        try {
+            rideRepository
+                    .findById(paymentRequestDto.rideId())
+                    .ifPresent(ride ->
+                            ride.setPaymentId(paymentRequestDto.paymentId()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return true;
+    }
+
     private boolean isRideAcceptedByTheDriver(
             String actualDriverId, String requestDriverId) {
         if (actualDriverId != null && requestDriverId != null) {

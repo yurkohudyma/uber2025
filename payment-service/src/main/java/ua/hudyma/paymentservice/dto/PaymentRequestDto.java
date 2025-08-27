@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 public record PaymentRequestDto(
         Long rideId,
         PaymentType paymentType,
-        BigDecimal amount
+        BigDecimal amount,
+        String paymentId
 ) {
 }

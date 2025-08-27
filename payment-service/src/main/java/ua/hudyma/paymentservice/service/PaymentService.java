@@ -23,13 +23,25 @@ public class PaymentService {
     public Payment applyPayment(PaymentRequestDto paymentRequestDto) {
         var rideId = paymentRequestDto.rideId();
         if (rideClient.paymentExists(rideId)){
-            throw new PaymentAlreadyAppliedException("Ride obtains payment ID. Cannot apply another");
+            throw new PaymentAlreadyAppliedException
+                    ("Ride obtains payment ID. Cannot apply another");
         }
         var payment = new Payment();
         payment.setId(generateId(8));
         payment.setRideId(rideId);
-        payment.setPaymentType(CASH);
+        payment.setPaymentType(paymentRequestDto.paymentType());
         payment.setAmount(paymentRequestDto.amount());
-        return paymentRepository.save(payment);
+        paymentRepository.save(payment);
+        var updatedPaymentDto = new PaymentRequestDto(
+                paymentRequestDto.rideId(),
+                payment.getPaymentType(),
+                paymentRequestDto.amount(),
+                payment.getId());
+        try {
+            rideClient.upsertRide(updatedPaymentDto);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return payment;
     }
 }

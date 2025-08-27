@@ -36,6 +36,11 @@ public class RideController {
                 ride.getPaxId());
     }
 
+    @PatchMapping("/upsertRidePaymentId")
+    public boolean updateRidePaymentId (@RequestBody PaymentRequestDto paymentRequestDto){
+        return rideService.upsertRidePaymentId (paymentRequestDto);
+    }
+
     @PostMapping
     public ResponseEntity<Ride> addRide(
             @RequestBody RideRequestDto dto) {

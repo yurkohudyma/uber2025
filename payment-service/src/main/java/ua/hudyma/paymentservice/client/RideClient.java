@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import ua.hudyma.paymentservice.dto.PaymentRequestDto;
 
 @Service
 @RequiredArgsConstructor
@@ -18,5 +19,15 @@ public class RideClient {
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .block());
+    }
+
+    public void upsertRide(PaymentRequestDto paymentRequestDto) {
+        rideServiceWebClient
+                .patch()
+                .uri("/rides/upsertRidePaymentId")
+                .bodyValue(paymentRequestDto)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
     }
 }
