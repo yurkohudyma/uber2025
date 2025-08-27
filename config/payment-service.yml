@@ -1,0 +1,52 @@
+server:
+  port: 9096
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/uber2025_paymentservice
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  application:
+    name: payment-service
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        show_sql: false
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+
+  kafka:
+    bootstrap-servers: localhost:9999
+    consumer:
+      group-id: uber2025_paymentservice
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.client.RestTemplate: INFO
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+    org.springframework.web.HttpLogging: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env
