@@ -10,6 +10,7 @@ import ua.hudyma.ratingservice.dto.ReviewRequestDto;
 import ua.hudyma.ratingservice.dto.RideResponseDto;
 import ua.hudyma.ratingservice.enums.Rating;
 import ua.hudyma.ratingservice.enums.ReviewAuthor;
+import ua.hudyma.ratingservice.exception.ReviewAllreadyExistsException;
 import ua.hudyma.ratingservice.repository.ReviewRepository;
 import ua.hudyma.ratingservice.repository.UserReviewStatsRepository;
 
@@ -26,13 +27,19 @@ public class ReviewService {
     private final RideClient rideClient;
 
     public Review addReview(ReviewRequestDto requestDto) {
-        //todo implem check for duplicate reviews both for driver and pax for the ride
         var rideResponseDto = rideClient.getRideDto(requestDto.rideId());
         var reviewAuthor = requestDto.reviewAuthor();
         var forUserId = reviewAuthor == PAX
                 ? rideResponseDto.driverId() : rideResponseDto.paxId();
         var fromUserId = reviewAuthor == DRIVER
                 ? rideResponseDto.driverId() : rideResponseDto.paxId();
+
+        if (reviewRepository.existsByForUserId(forUserId)){
+            throw new ReviewAllreadyExistsException("Review already exists for userId = " + forUserId);
+        }
+        if (reviewRepository.existsByFromUserId(fromUserId)){
+            throw new ReviewAllreadyExistsException("Review already exists for userId = " + fromUserId);
+        }
 
         var review = new Review();
         review.setRating(requestDto.rating());
@@ -62,7 +69,6 @@ public class ReviewService {
     }
 
     private void updateUserReviewStats(
-            //todo вставити захист проти дублікатів відгуків на ту ж поїздку
             UserReviewStats userReviewStats,
             String userId) {
         var userReviews = reviewRepository
