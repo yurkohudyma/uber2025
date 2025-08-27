@@ -15,6 +15,8 @@ import ua.hudyma.ratingservice.repository.UserReviewStatsRepository;
 
 import java.util.List;
 
+import static ua.hudyma.ratingservice.enums.ReviewAuthor.*;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -26,22 +28,24 @@ public class ReviewService {
     public Review addReview(ReviewRequestDto requestDto) {
         //todo implem check for duplicate reviews both for driver and pax for the ride
         var rideResponseDto = rideClient.getRideDto(requestDto.rideId());
-        var forUserId = requestDto.reviewAuthor() == ReviewAuthor.PAX
+        var reviewAuthor = requestDto.reviewAuthor();
+        var forUserId = reviewAuthor == PAX
                 ? rideResponseDto.driverId() : rideResponseDto.paxId();
-        var fromUserId = requestDto.reviewAuthor() == ReviewAuthor.DRIVER
-                ? rideResponseDto.paxId() : rideResponseDto.driverId();
+        var fromUserId = reviewAuthor == DRIVER
+                ? rideResponseDto.driverId() : rideResponseDto.paxId();
 
         var review = new Review();
         review.setRating(requestDto.rating());
         review.setFeedback(requestDto.feedback());
         review.setForUserId(forUserId);
         review.setFromUserId(fromUserId);
-        review.setReviewAuthor(requestDto.reviewAuthor());
+        review.setReviewAuthor(reviewAuthor);
         review.setRideId(requestDto.rideId());
 
         if (requestDto.comment() != null){
             review.setComment(requestDto.comment());
         }
+        reviewRepository.save(review);
         var userReviewStats = userReviewStatsRepository
                 .findByUserId(forUserId);
         if (userReviewStats.isPresent()){
@@ -54,20 +58,11 @@ public class ReviewService {
             newUserReviewStats.setPublishedReviewsNumber(1L);
             userReviewStatsRepository.save(newUserReviewStats);
         }
-        return reviewRepository.save(review);
-    }
-
-    public List<Review> getAllFromUser(String fromUserId) {
-        return reviewRepository.findByFromUserId(fromUserId);
-    }
-
-    public RideResponseDto getRide(Long rideId) {
-        return rideClient.getRideDto(rideId);
+        return review;
     }
 
     private void updateUserReviewStats(
-
-            //todo переробити, бо не працює як треба
+            //todo вставити захист проти дублікатів відгуків на ту ж поїздку
             UserReviewStats userReviewStats,
             String userId) {
         var userReviews = reviewRepository
@@ -92,5 +87,13 @@ public class ReviewService {
 
     public List<Review> getAll() {
         return reviewRepository.findAll();
+    }
+
+    public List<Review> getAllFromUser(String fromUserId) {
+        return reviewRepository.findByFromUserId(fromUserId);
+    }
+
+    public RideResponseDto getRide(Long rideId) {
+        return rideClient.getRideDto(rideId);
     }
 }

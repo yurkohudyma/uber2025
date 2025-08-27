@@ -18,8 +18,10 @@ import java.util.List;
     private final ReviewService reviewService;
 
     @GetMapping("/getRide/{rideId}")
-    public ResponseEntity<RideResponseDto> getRideDto (@PathVariable Long rideId){
-        return ResponseEntity.ok(reviewService.getRide (rideId));
+    public ResponseEntity<RideResponseDto> getRideDto (
+            @PathVariable Long rideId){
+        return ResponseEntity.ok(reviewService
+                .getRide (rideId));
     }
 
     @GetMapping
@@ -28,7 +30,8 @@ import java.util.List;
     }
 
     @GetMapping("/{fromUserId}")
-    public List<Review> getAllReviewsFromUser (@PathVariable String fromUserId){
+    public List<Review> getAllReviewsFromUser (
+            @PathVariable String fromUserId){
         return reviewService.getAllFromUser(fromUserId);
     }
 
