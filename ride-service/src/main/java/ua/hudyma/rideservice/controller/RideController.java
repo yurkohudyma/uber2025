@@ -61,6 +61,14 @@ public class RideController {
         return vehicleService.existsById(vehicleId);
     }
 
+    @GetMapping("/paymentExists")
+    public boolean paymentExistsByRideId (
+            @RequestParam Long rideId){
+        return rideService.paymentExistsByRideId(rideId);
+    }
+
+
+
     @PostMapping("/distance")
     public ResponseEntity<RouteDistanceResponseDto> getDistanceWithTrack
             (@RequestBody RouteDto dto) {

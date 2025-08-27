@@ -113,6 +113,15 @@ public class RideService {
         return DECLINED_BY_DRIVER;
     }
 
+    public boolean paymentExistsByRideId(Long rideId) {
+        return rideRepository
+                .findById(rideId)
+                .stream()
+                .map (ride -> ride.getPaymentId() != null)
+                .findAny()
+                .orElse(false);
+    }
+
     private boolean isRideAcceptedByTheDriver(
             String actualDriverId, String requestDriverId) {
         if (actualDriverId != null && requestDriverId != null) {
