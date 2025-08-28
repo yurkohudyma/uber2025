@@ -17,6 +17,53 @@ spring:
                 fallbackUri: forward:/fallback/ride-service
           order: -1
 
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - RewritePath=/user-service/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: userServiceCircuitBreaker
+                fallbackUri: forward:/fallback/user-service
+          order: -1
+
+        - id: geolocation-service
+          uri: lb://geolocation-service
+          predicates:
+            - Path=/geolocation-service/**
+          filters:
+            - RewritePath=/geolocation-service/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: geolocationServiceCircuitBreaker
+                fallbackUri: forward:/fallback/geolocation-service
+          order: -1
+
+        - id: rating-service
+          uri: lb://rating-service
+          predicates:
+            - Path=/rating-service/**
+          filters:
+            - RewritePath=/rating-service/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: ratingServiceCircuitBreaker
+                fallbackUri: forward:/fallback/rating-service
+          order: -1
+
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/payment-service/**
+          filters:
+            - RewritePath=/payment-service/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: paymentServiceCircuitBreaker
+                fallbackUri: forward:/fallback/payment-service
+          order: -1
 
       httpclient:
         connect-timeout: 1000 # мілісекунди
