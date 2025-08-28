@@ -3,13 +3,25 @@ server:
 
 spring:
   cloud:
-     gateway:
-      server:
-        webflux:
-          discovery:
-            locator:
-              enabled: true
-              lower-case-service-id: true
+    gateway:
+      routes:
+        - id: ride-service
+          uri: lb://ride-service
+          predicates:
+            - Path=/ride-service/**
+          filters:
+            - RewritePath=/ride-service/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: rideServiceCircuitBreaker
+                fallbackUri: forward:/fallback/ride-service
+          order: -1
+
+
+      httpclient:
+        connect-timeout: 1000 # мілісекунди
+        response-timeout: 2s  # або 2000ms
+
 
   application:
     name: apigateway-service
@@ -34,9 +46,27 @@ logging:
     com.netflix.discovery: WARN
     com.netflix.eureka: WARN
     org.springframework.web.HttpLogging: WARN
+    org.springframework.cloud.gateway: WARN
 
 management:
   endpoints:
     web:
       exposure:
         include: env
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      rideServiceCircuitBreaker:
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 2s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+  timelimiter:
+    instances:
+      rideServiceCircuitBreaker:
+        timeoutDuration: 2s
+
+
