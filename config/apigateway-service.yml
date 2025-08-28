@@ -1,0 +1,42 @@
+server:
+  port: 9099
+
+spring:
+  cloud:
+     gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+
+  application:
+    name: apigateway-service
+
+  kafka:
+    bootstrap-servers: localhost:9999
+    consumer:
+      group-id: uber2025_apigatewayservice
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.client.RestTemplate: INFO
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+    org.springframework.web.HttpLogging: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env

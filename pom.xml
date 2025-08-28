@@ -67,6 +67,7 @@
       <module>ride-service</module>
       <module>rating-service</module>
       <module>payment-service</module>
+    <module>apigateway-service</module>
   </modules>
 
 

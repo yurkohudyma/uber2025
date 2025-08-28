@@ -28,7 +28,6 @@ public class Payment {
     @CreationTimestamp
     private Date paidOn;
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
-    @CreationTimestamp
     private Date refundedOn;
 
 }
