@@ -39,5 +39,11 @@ public class FallbackController {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body("Payment Service is unavailable");
     }
+
+    @GetMapping("/search-service")
+    public ResponseEntity<String> fallbackSearch() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Search Service is unavailable");
+    }
 }
 

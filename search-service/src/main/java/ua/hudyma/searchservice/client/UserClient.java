@@ -12,14 +12,23 @@ public class UserClient {
 
     private final WebClient userServiceWebClient;
 
-    public boolean paxExists(String paxId) {
+    public String getUserIdByEmail(String email) {
+        return userServiceWebClient
+                .get()
+                .uri("/users?email={email}", email)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+    }
+
+    /*public boolean paxExists(String paxId) {
         return Boolean.TRUE.equals(userServiceWebClient
                 .get()
                 .uri("/users/paxExists?paxId={paxId}", paxId)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .block());
-    }
+    }*/
 
     public boolean driverExists(String driverId) {
         return Boolean.TRUE.equals(userServiceWebClient

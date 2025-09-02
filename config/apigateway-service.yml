@@ -14,6 +14,18 @@ spring:
             response-timeout: 2s # або 2000ms
 
           routes:
+            - id: search-service
+              uri: lb://search-service
+              predicates:
+                - Path=/search-service/**
+              filters:
+                - RewritePath=/search-service/(?<segment>.*), /${segment}
+                - name: CircuitBreaker
+                  args:
+                    name: searchServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/search-service
+              order: -1
+
             - id: ride-service
               uri: lb://ride-service
               predicates:

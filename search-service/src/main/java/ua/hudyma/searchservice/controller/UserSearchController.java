@@ -16,10 +16,16 @@ public class UserSearchController {
     private final UserSearchService userSearchService;
 
     @GetMapping
-    public String findByStringValue (@RequestParam String str,
-                                     @RequestParam String userId){
+    public String findByStringValue (
+            @RequestParam String str,
+            @RequestParam String userId){
         return userSearchService.findString (str, userId);
+    }
 
+    @GetMapping("/email")
+    public String findUserIdByEmail (
+            @RequestParam String email){
+        return userSearchService.getUserIdByEmail(email);
     }
 
 
