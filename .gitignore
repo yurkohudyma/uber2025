@@ -16,3 +16,16 @@
 /rating-service/target/
 /payment-service/target/
 /apigateway-service/target/
+/search-service/target/classes/ua/hudyma/searchservice/service/KaffkaProducer.class
+/search-service/target/classes/ua/hudyma/searchservice/service/KaffkaListener.class
+/search-service/target/classes/ua/hudyma/searchservice/config/KafkaConfig.class
+/search-service/target/classes/ua/hudyma/searchservice/SearchServiceApplication.class
+/search-service/target/classes/ua/hudyma/searchservice/config/WebClientConfig.class
+/search-service/target/classes/ua/hudyma/searchservice/controller/AdminSearchController.class
+/search-service/target/classes/ua/hudyma/searchservice/service/AdminSearchService.class
+/search-service/target/classes/ua/hudyma/searchservice/client/GeoClient.class
+/search-service/target/classes/ua/hudyma/searchservice/client/RatingClient.class
+/search-service/target/classes/ua/hudyma/searchservice/client/RideClient.class
+/search-service/target/classes/ua/hudyma/searchservice/client/UserClient.class
+/search-service/target/classes/ua/hudyma/searchservice/controller/UserSearchController.class
+/search-service/target/classes/ua/hudyma/searchservice/service/UserSearchService.class

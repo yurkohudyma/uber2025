@@ -111,7 +111,7 @@ management:
   prometheus:
     metrics:
       export:
-        enabled:
+        enabled: true
 
 
 resilience4j:

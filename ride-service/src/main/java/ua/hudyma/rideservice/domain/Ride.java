@@ -68,4 +68,13 @@ public class Ride {
     BigDecimal routeDistance;
     @Transient
     BigDecimal toPaxRouteDistance;
+
+    @Override
+    public String toString() {
+        return "Ride{" +
+                "id=" + id +
+                ", driverId='" + driverId + '\'' +
+                ", paxId='" + paxId + '\'' +
+                '}';
+    }
 }

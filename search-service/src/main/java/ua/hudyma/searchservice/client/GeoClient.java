@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import ua.hudyma.rideservice.dto.RouteDistanceResponseDto;
-import ua.hudyma.rideservice.dto.RouteDto;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +11,7 @@ import ua.hudyma.rideservice.dto.RouteDto;
 public class GeoClient {
     private final WebClient geoServiceWebClient;
 
-    public RouteDistanceResponseDto getDistance(RouteDto dto, boolean addTrack){
+    /*public RouteDistanceResponseDto getDistance(RouteDto dto, boolean addTrack){
         var uri = addTrack ? "/distance" : "/distance/noTrack";
         return geoServiceWebClient
                 .post()
@@ -22,5 +20,5 @@ public class GeoClient {
                 .retrieve()
                 .bodyToMono(RouteDistanceResponseDto.class)
                 .block();
-    }
+    }*/
 }

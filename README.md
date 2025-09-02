@@ -6,6 +6,7 @@ Uber taxi reservation system:
   <li>Online vehicle movement tracing on map</li>
   <li>Rating system for both driver and passenger</li>
   <li>Payment</li>
+  <li>Search Engine</li>
   <li>Ride management</li>
 </ul>
 

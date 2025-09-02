@@ -15,7 +15,7 @@ public class RideClient {
     public String findString(String str, String userId) {
         return rideServiceWebClient
                 .get()
-                .uri("/rides/find?{str}&userId={userId}", str, userId)
+                .uri("/search?str={str}&userId={userId}", str, userId)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
