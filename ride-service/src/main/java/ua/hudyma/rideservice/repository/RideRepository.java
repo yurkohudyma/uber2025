@@ -6,4 +6,5 @@ import ua.hudyma.rideservice.domain.Ride;
 
 @Repository
 public interface RideRepository extends JpaRepository<Ride, Long> {
+    String findString(String str);
 }

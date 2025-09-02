@@ -68,6 +68,7 @@
       <module>rating-service</module>
       <module>payment-service</module>
     <module>apigateway-service</module>
+    <module>search-service</module>
   </modules>
 
 
